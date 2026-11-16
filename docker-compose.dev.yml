@@ -1,0 +1,16 @@
+# Local development stack: PostgreSQL for the Activation Desk API.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: activationdesk-db
+    environment:
+      POSTGRES_USER: activation
+      POSTGRES_PASSWORD: activation
+      POSTGRES_DB: activationdesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
