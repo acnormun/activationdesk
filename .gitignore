@@ -16,6 +16,11 @@ __pycache__/
 .venv/
 venv/
 
+# Local databases (mock dev database)
+*.db
+*.sqlite
+*.sqlite3
+
 # Logs
 logs
 *.log

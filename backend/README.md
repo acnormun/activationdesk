@@ -24,6 +24,22 @@ uvicorn app.main:app --reload
 python -m unittest discover -s tests -v
 ```
 
+### Run without Docker (mock SQLite database)
+
+```bash
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload   # no .env: runs on sqlite:///./activationdesk.dev.db
+```
+
+- Without a `.env` file the API runs on a local mock SQLite database, created
+  and seeded automatically at startup (git-ignored).
+- Every login creates an isolated demo workspace with 5 mock accounts covering
+  every Pipeline 1 lane.
+- To switch to PostgreSQL later, uncomment the PostgreSQL URL in `.env` and
+  start the compose stack.
+
 ## Request checks (every request, in this order)
 
 1. Valid session -> otherwise **401**
