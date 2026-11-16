@@ -9,6 +9,13 @@ dist
 # Node dependencies
 node_modules
 
+# Python (pipeline)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
 # Logs
 logs
 *.log
