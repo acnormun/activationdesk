@@ -10,10 +10,10 @@ Pipeline 0 - access and request flow. FastAPI + PostgreSQL with mock data.
 ## Run
 
 ```bash
-# 1. PostgreSQL (from the repository root)
-docker compose -f docker-compose.dev.yml up -d
+# 1. Single service (PostgreSQL + API serving the built frontend) on :8000
+docker compose -f docker-compose.dev.yml up -d --build
 
-# 2. API
+# 2. API only (pair with `cd frontend && npm run dev` for hot-reload)
 cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -23,6 +23,10 @@ uvicorn app.main:app --reload
 # 3. Tests
 python -m unittest discover -s tests -v
 ```
+
+The API serves the built frontend (from `frontend/dist`) on the same origin
+when that directory is present — no CORS or cross-origin cookie setup is
+needed in the single-service deployment.
 
 ### Run without Docker (mock SQLite database)
 

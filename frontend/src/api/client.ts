@@ -6,7 +6,9 @@ import type {
   WeekPlan,
 } from "@/types/workbench"
 
-const API_BASE: string = window.__API_BASE__ ?? "http://localhost:8000"
+// Same-origin: the backend serves the frontend (single service). In local
+// dev, the Vite proxy forwards these calls to the backend (see vite.config.ts).
+const API_BASE: string = ""
 
 /** Error carrying the HTTP status and the human-readable API detail. */
 export class ApiError extends Error {

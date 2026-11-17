@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Python
+backend/.venv
+backend/**/__pycache__
+backend/**/*.py[cod]
+backend/*.db
+backend/.env
+
+# Node
+frontend/node_modules
+frontend/dist
+
+# Docs / scratch
+data
+mermaid
+project-data
+.dirtect
+.dirktek

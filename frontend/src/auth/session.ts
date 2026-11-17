@@ -1,7 +1,7 @@
 import { reactive } from "vue"
 import type { SessionResponse, User, Workspace } from "@/types/auth"
 
-const API_BASE: string = window.__API_BASE__ ?? "http://localhost:8000"
+const API_BASE: string = ""
 
 /** App-wide session state, restored from the HttpOnly cookie when needed. */
 export const session = reactive({
