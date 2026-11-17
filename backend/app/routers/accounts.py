@@ -1,4 +1,4 @@
-"""Account routes: reads plus the 8 write actions.
+"""Account routes: reads plus the 9 write actions.
 
 Every write runs change + history + Pipeline 1 recalculation in a single
 transaction (apply_change). Dependencies keep the check order:
@@ -21,6 +21,8 @@ from ..business import (
     RECORD_VALUE_EVIDENCE,
     SET_NEXT_ACTION,
     SET_TARGET_DATE,
+    ACTIVITY_MILESTONES,
+    UPDATE_MILESTONE,
 )
 from datetime import date
 
@@ -35,6 +37,7 @@ from ..schemas import (
     CustomerUpdateRequest,
     EvidenceRequest,
     HistoryOut,
+    MilestoneOut,
     NoteRequest,
     SetNextActionRequest,
     SetTargetDateRequest,
@@ -51,6 +54,14 @@ def account_out(account: Account) -> AccountOut:
         update={
             "status": result.status.value,
             "flags": [flag.value for flag in result.flags],
+            "activity_milestones": [
+                MilestoneOut(
+                    name=name,
+                    done=getattr(account, column) is not None,
+                    completed_at=getattr(account, column),
+                )
+                for name, column in ACTIVITY_MILESTONES.items()
+            ],
         }
     )
 
@@ -196,6 +207,36 @@ def record_progress(
         pass  # progress is recorded in the history only
 
     apply_change(db, account, actor.role, RECORD_PROGRESS, mutate, f"Progress note: {note}")
+    return account_out(account)
+
+
+@router.post("/{slug}/milestones/{name}", response_model=AccountOut)
+def complete_milestone(
+    slug: str,
+    name: str,
+    actor: Actor = Depends(get_actor),
+    account: Account = Depends(get_scoped_account),
+    db: Session = Depends(get_db),
+) -> AccountOut:
+    """Record that an activity milestone (setup, import or training) is done.
+
+    The manager records the progress even when the customer did the task."""
+    reason = validate_action(UPDATE_MILESTONE, account, {"milestone": name})
+    if reason:
+        raise HTTPException(status_code=422, detail=reason)
+    column = ACTIVITY_MILESTONES[name]
+
+    def mutate() -> None:
+        setattr(account, column, date.today())
+
+    apply_change(
+        db,
+        account,
+        actor.role,
+        UPDATE_MILESTONE,
+        mutate,
+        f"{name.capitalize()} milestone marked done",
+    )
     return account_out(account)
 
 

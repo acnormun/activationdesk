@@ -18,6 +18,14 @@ OPEN_INTERNAL_BLOCKER = "open_internal_blocker"
 CLOSE_INTERNAL_BLOCKER = "close_internal_blocker"
 CLOSE_CUSTOMER_BLOCKER = "close_customer_blocker"
 RECORD_VALUE_EVIDENCE = "record_value_evidence"
+UPDATE_MILESTONE = "update_milestone"
+
+# Activity milestones: persisted column for each public milestone name.
+ACTIVITY_MILESTONES = {
+    "setup": "setup_done_at",
+    "import": "import_done_at",
+    "training": "training_done_at",
+}
 from .domain.models import Status
 from .facts import has_evidence
 
@@ -30,6 +38,7 @@ MUTATING_ACTIONS = {
     CLOSE_INTERNAL_BLOCKER,
     CLOSE_CUSTOMER_BLOCKER,
     RECORD_VALUE_EVIDENCE,
+    UPDATE_MILESTONE,
 }
 
 
@@ -68,4 +77,10 @@ def validate_action(action: str, account: Account, payload: dict) -> str | None:
             return "Closing a customer blocker requires a (simulated) customer update."
     if action == RECORD_VALUE_EVIDENCE and has_evidence(account):
         return "First value is already registered with evidence."
+    if action == UPDATE_MILESTONE:
+        column = ACTIVITY_MILESTONES.get(payload.get("milestone") or "")
+        if column is None:
+            return "Unknown activity milestone."
+        if getattr(account, column) is not None:
+            return "That milestone is already done."
     return None

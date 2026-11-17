@@ -117,3 +117,8 @@ export function recordValueEvidence(
 ): Promise<Account> {
   return postJson(`/accounts/${slug}/value-evidence`, payload)
 }
+
+/** Record that an activity milestone (setup, import or training) is done. */
+export function markMilestoneDone(slug: string, name: string): Promise<Account> {
+  return postJson(`/accounts/${slug}/milestones/${name}`, {})
+}

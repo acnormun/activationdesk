@@ -73,6 +73,14 @@ class HistoryOut(BaseModel):
     created_at: datetime
 
 
+class MilestoneOut(BaseModel):
+    """One activity milestone (setup, import or training)."""
+
+    name: str
+    done: bool
+    completed_at: date | None
+
+
 class AccountOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -95,3 +103,4 @@ class AccountOut(BaseModel):
     evidence_workflow_confirmed: bool = False
     evidence_approved_at: date | None = None
     evidence_recorded_by: str | None = None
+    activity_milestones: list[MilestoneOut] = []

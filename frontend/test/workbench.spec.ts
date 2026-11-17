@@ -33,6 +33,11 @@ function account(overrides: Partial<Account> = {}): Account {
     evidence_workflow_confirmed: false,
     evidence_approved_at: null,
     evidence_recorded_by: null,
+    activity_milestones: [
+      { name: "setup", done: false, completed_at: null },
+      { name: "import", done: false, completed_at: null },
+      { name: "training", done: false, completed_at: null },
+    ],
     ...overrides,
   }
 }
@@ -130,38 +135,50 @@ describe("buildMilestones", () => {
   it("marks all milestones pending on a fresh account", () => {
     const checks = buildMilestones(account())
     expect(checks.map((c) => [c.label, c.state])).toEqual([
-      ["First value evidence", "pending"],
-      ["Next action", "pending"],
-      ["Internal blocker", "done"],
-      ["Customer blocker", "done"],
+      ["Setup", "pending"],
+      ["Import", "pending"],
+      ["Training", "pending"],
+      ["First value", "pending"],
     ])
   })
 
-  it("marks recorded evidence and next action as done with details", () => {
+  it("marks done activity milestones with the completion date", () => {
     const checks = buildMilestones(
       account({
-        next_action: "Send invoice sample",
-        follow_up_date: "2026-11-20",
+        activity_milestones: [
+          { name: "setup", done: true, completed_at: "2026-11-10" },
+          { name: "import", done: false, completed_at: null },
+          { name: "training", done: true, completed_at: "2026-11-15" },
+        ],
+      }),
+    )
+    expect(checks[0]).toMatchObject({ label: "Setup", state: "done" })
+    expect(checks[0].detail).toContain("2026-11-10")
+    expect(checks[1]).toMatchObject({ label: "Import", state: "pending" })
+    expect(checks[2]).toMatchObject({ label: "Training", state: "done" })
+  })
+
+  it("marks first value done with the evidence details", () => {
+    const checks = buildMilestones(
+      account({
         evidence_approved_by: "Dana",
         evidence_invoice_ref: "INV-42",
         evidence_approved_at: "2026-11-15",
         evidence_recorded_by: "manager",
       }),
     )
-    const [evidence, nextAction] = checks
-    expect(evidence.state).toBe("done")
-    expect(evidence.detail).toContain("INV-42")
-    expect(evidence.detail).toContain("Dana")
-    expect(nextAction.state).toBe("done")
-    expect(nextAction.detail).toContain("Send invoice sample")
-    expect(nextAction.detail).toContain("2026-11-20")
+    const firstValue = checks[checks.length - 1]
+    expect(firstValue).toMatchObject({ label: "First value", state: "done" })
+    expect(firstValue.detail).toContain("INV-42")
+    expect(firstValue.detail).toContain("Dana")
   })
 
-  it("marks open blockers as blocked", () => {
+  it("keeps blockers and the next action out of the milestone list", () => {
     const checks = buildMilestones(
       account({ internal_blocker: "Waiting on security review", customer_blocker: "Needs legal" }),
     )
-    expect(checks[2]).toMatchObject({ label: "Internal blocker", state: "blocked" })
-    expect(checks[3]).toMatchObject({ label: "Customer blocker", state: "blocked" })
+    expect(checks.map((c) => c.label)).not.toContain("Internal blocker")
+    expect(checks.map((c) => c.label)).not.toContain("Customer blocker")
+    expect(checks.map((c) => c.label)).not.toContain("Next action")
   })
 })

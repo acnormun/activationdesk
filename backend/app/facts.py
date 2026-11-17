@@ -5,8 +5,8 @@ priority from them. This module is the only place that maps between the
 two, so the API never duplicates a domain rule.
 
 Mapping notes (demo scope):
-- Every account has exactly one milestone of kind VALUE ("First value");
-  the demo database does not track activity milestones.
+- Three activity milestones (Setup, Import, Training) come from the
+  *_done_at columns; "First value" remains the only VALUE milestone.
 - Only OPEN blockers are mapped: closing a blocker clears the column, so
   resolved history is not persisted yet.
 - A next action is mapped only when it has a follow-up date (the write
@@ -52,11 +52,30 @@ def to_domain(account: Account) -> DomainAccount:
         milestone_status = MilestoneStatus.DONE
         completed_at = account.evidence_approved_at
 
-    milestones = (
+    activity_specs = (
+        ("Setup", account.setup_done_at),
+        ("Import", account.import_done_at),
+        ("Training", account.training_done_at),
+    )
+    milestones = tuple(
+        Milestone(
+            name=name,
+            kind=MilestoneKind.ACTIVITY,
+            order=order,
+            status=(
+                MilestoneStatus.DONE
+                if done_at is not None
+                else MilestoneStatus.NOT_STARTED
+            ),
+            completed_at=done_at,
+            evidence=None,
+        )
+        for order, (name, done_at) in enumerate(activity_specs, start=1)
+    ) + (
         Milestone(
             name="First value",
             kind=MilestoneKind.VALUE,
-            order=1,
+            order=len(activity_specs) + 1,
             status=milestone_status,
             completed_at=completed_at,
             evidence=evidence,

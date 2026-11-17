@@ -1,5 +1,12 @@
 /** Shapes returned by the /accounts and /plan/week endpoints. */
 
+/** One activity milestone as returned by /accounts. */
+export interface ActivityMilestone {
+  name: string
+  done: boolean
+  completed_at: string | null
+}
+
 export interface Account {
   id: number
   slug: string
@@ -13,6 +20,7 @@ export interface Account {
   flags: string[]
   next_action: string | null
   follow_up_date: string | null
+  activity_milestones: ActivityMilestone[]
   internal_blocker: string | null
   customer_blocker: string | null
   evidence_approved_by: string | null

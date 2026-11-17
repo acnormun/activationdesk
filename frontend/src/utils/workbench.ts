@@ -75,7 +75,19 @@ export function targetLabel(target: string, today: string): string {
 }
 
 /** Verification state of one account milestone. */
-export type MilestoneState = "done" | "pending" | "blocked"
+export type MilestoneState = "done" | "pending"
+
+/** Display names for the activity milestone names. */
+export const MILESTONE_LABELS: Record<string, string> = {
+  setup: "Setup",
+  import: "Import",
+  training: "Training",
+}
+
+/** Human label for one activity milestone name. */
+export function milestoneLabel(name: string): string {
+  return MILESTONE_LABELS[name] ?? name
+}
 
 export interface MilestoneCheck {
   label: string
@@ -83,34 +95,23 @@ export interface MilestoneCheck {
   detail: string
 }
 
-/** Milestone checklist for one account: value evidence, next action, blockers. */
+/** Milestone checklist for one account: the activity milestones plus the
+ * "First value" milestone. Blockers and the next action are facts of their
+ * own, not milestones, so they stay out of this list. */
 export function buildMilestones(account: Account): MilestoneCheck[] {
-  return [
-    {
-      label: "First value evidence",
-      state: account.evidence_approved_by ? "done" : "pending",
-      detail: account.evidence_approved_by
-        ? `Invoice ${account.evidence_invoice_ref} approved by ${account.evidence_approved_by} on ${account.evidence_approved_at ?? "?"} (recorded by ${account.evidence_recorded_by ?? "?"})`
-        : "Not recorded yet",
-    },
-    {
-      label: "Next action",
-      state: account.next_action ? "done" : "pending",
-      detail: account.next_action
-        ? `${account.next_action} (follow-up ${account.follow_up_date ?? "unscheduled"})`
-        : "None recorded",
-    },
-    {
-      label: "Internal blocker",
-      state: account.internal_blocker ? "blocked" : "done",
-      detail: account.internal_blocker ?? "None",
-    },
-    {
-      label: "Customer blocker",
-      state: account.customer_blocker ? "blocked" : "done",
-      detail: account.customer_blocker ?? "None",
-    },
-  ]
+  const checks: MilestoneCheck[] = account.activity_milestones.map((milestone) => ({
+    label: milestoneLabel(milestone.name),
+    state: milestone.done ? "done" : "pending",
+    detail: milestone.done ? `Done ${milestone.completed_at ?? ""}`.trim() : "Not done yet",
+  }))
+  checks.push({
+    label: "First value",
+    state: account.evidence_approved_by ? "done" : "pending",
+    detail: account.evidence_approved_by
+      ? `Invoice ${account.evidence_invoice_ref} approved by ${account.evidence_approved_by} on ${account.evidence_approved_at ?? "?"}`
+      : "No representative invoice approved yet",
+  })
+  return checks
 }
 
 /** Filter accounts by status and free text across slug, name and owner. */

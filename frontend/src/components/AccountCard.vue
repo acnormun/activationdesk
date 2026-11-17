@@ -5,6 +5,7 @@ import {
   assignOwner,
   closeCustomerBlocker,
   closeInternalBlocker,
+  markMilestoneDone,
   openInternalBlocker,
   recordProgress,
   recordValueEvidence,
@@ -15,6 +16,7 @@ import type { Account } from "@/types/workbench"
 import {
   buildMilestones,
   flagLabel,
+  milestoneLabel,
   statusClass,
   statusLabel,
   targetLabel,
@@ -46,6 +48,14 @@ const menuActions = computed(() => {
     { name: "next-action", label: "Set next action" },
     { name: "progress", label: "Record progress" },
   ]
+  for (const milestone of props.account.activity_milestones) {
+    if (!milestone.done) {
+      actions.push({
+        name: `milestone-${milestone.name}`,
+        label: `Mark ${milestoneLabel(milestone.name)} done`,
+      })
+    }
+  }
   if (!props.account.internal_blocker) {
     actions.push({ name: "internal-blocker", label: "Open internal blocker" })
   }
@@ -76,6 +86,10 @@ const canAct = computed(() => props.account.status !== "activated")
 function toggleForm(name: string): void {
   errorMessage.value = ""
   menuOpen.value = false
+  if (name.startsWith("milestone-")) {
+    run(() => markMilestoneDone(props.account.slug, name.slice("milestone-".length)))
+    return
+  }
   openForm.value = openForm.value === name ? "" : name
 }
 
@@ -179,13 +193,6 @@ async function run(action: () => Promise<unknown>): Promise<void> {
         </li>
       </ul>
     </section>
-
-    <div v-if="account.evidence_approved_by" class="evidence-box">
-      First value recorded: invoice {{ account.evidence_invoice_ref }} approved by
-      {{ account.evidence_approved_by }} on {{ account.evidence_approved_at }} (recorded by
-      {{ account.evidence_recorded_by }}).
-    </div>
-    <div v-else class="evidence-box pending">First value not recorded yet.</div>
 
     <div v-if="account.internal_blocker" class="blocker-box">
       <span>Internal blocker: {{ account.internal_blocker }}</span>

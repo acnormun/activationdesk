@@ -84,3 +84,32 @@ class ActionTests(ApiTestCase):
         detail = self.client.get("/accounts/beta").json()
         pairs = [(h["action"], h["actor_role"]) for h in detail["history"]]
         self.assertIn(("close_customer_blocker", "onboarding_manager"), pairs)
+
+    def test_milestone_marked_done_records_fact_and_history(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post("/accounts/delta/milestones/setup")
+        self.assertEqual(response.status_code, 200)
+        milestones = {m["name"]: m for m in response.json()["activity_milestones"]}
+        self.assertTrue(milestones["setup"]["done"])
+        self.assertEqual(milestones["setup"]["completed_at"], str(date.today()))
+        detail = self.client.get("/accounts/delta").json()
+        pairs = [(h["action"], h["actor_role"]) for h in detail["history"]]
+        self.assertIn(("update_milestone", "onboarding_manager"), pairs)
+
+    def test_already_done_milestone_is_rejected(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post("/accounts/alpha/milestones/setup")
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("already done", response.json()["detail"])
+
+    def test_unknown_milestone_is_rejected(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post("/accounts/delta/milestones/go-live")
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("Unknown activity milestone", response.json()["detail"])
+
+    def test_activated_account_rejects_milestone_update(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post("/accounts/gamma/milestones/training")
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("activated", response.json()["detail"])

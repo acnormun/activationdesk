@@ -36,8 +36,8 @@ def ensure_demo_users(db: Session) -> None:
 
 def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
     """The instructions' six starting cases (Alpha-Zeta), with dates relative
-    to the demo login day; facts mirror app/domain/seed.py (the demo database
-    does not track activity milestones, only the VALUE milestone evidence)."""
+    to the demo login day; facts mirror Instructions.md, including the
+    activity milestones (setup, import, training) per starting case."""
     today = date.today()
     now = datetime.now(timezone.utc)
     desired_outcome = (
@@ -53,6 +53,8 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             owner="Ana",
             start_date=today - timedelta(days=14),
             target_date=today + timedelta(days=3),
+            setup_done_at=today - timedelta(days=6),
+            training_done_at=today - timedelta(days=2),
             internal_blocker="Sample-data mapping issue",
             internal_blocker_opened_at=now - timedelta(days=4),
         ),
@@ -64,6 +66,8 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             owner="Ana",
             start_date=today - timedelta(days=14),
             target_date=today + timedelta(days=2),
+            setup_done_at=today - timedelta(days=5),
+            import_done_at=today - timedelta(days=3),
             customer_blocker="Approval policy not provided",
             customer_blocker_opened_at=now - timedelta(days=4),
         ),
@@ -75,6 +79,9 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             owner="Ana",
             start_date=today - timedelta(days=14),
             target_date=today,
+            setup_done_at=today - timedelta(days=8),
+            import_done_at=today - timedelta(days=5),
+            training_done_at=today - timedelta(days=2),
             evidence_approved_by="Morgan Lee",
             evidence_invoice_ref="INV-2041",
             evidence_workflow_confirmed=True,
@@ -109,6 +116,7 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             owner="Ana",
             start_date=today - timedelta(days=14),
             target_date=today + timedelta(days=1),
+            training_done_at=today - timedelta(days=4),
             internal_blocker="Disputed invoice does not match the workflow",
             internal_blocker_opened_at=now - timedelta(days=2),
         ),
