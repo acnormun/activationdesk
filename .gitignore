@@ -30,6 +30,7 @@ logs
 .idea
 .fleet
 Thumbs.db
+.dirktect
 
 # Local env files
 .env
