@@ -17,7 +17,7 @@ docker compose -f docker-compose.dev.yml up -d
 cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # points to the compose PostgreSQL
+cp ../.env.example .env   # single env reference lives at the repo root
 uvicorn app.main:app --reload
 
 # 3. Tests
@@ -37,8 +37,8 @@ uvicorn app.main:app --reload   # no .env: runs on sqlite:///./activationdesk.de
   and seeded automatically at startup (git-ignored).
 - Every login creates an isolated demo workspace with the six starting cases
   from the instructions (Alpha-Zeta), covering every Pipeline 1 lane.
-- To switch to PostgreSQL later, uncomment the PostgreSQL URL in `.env` and
-  start the compose stack.
+- To switch to PostgreSQL locally, set `DATABASE_URL` in `.env` (see the
+  root `../.env.example`) and start the compose stack.
 
 ## Request checks (every request, in this order)
 

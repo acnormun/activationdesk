@@ -6,7 +6,7 @@ import type {
   WeekPlan,
 } from "@/types/workbench"
 
-const API_BASE: string = import.meta.env.VITE_API_BASE ?? "http://localhost:8000"
+const API_BASE: string = window.__API_BASE__ ?? "http://localhost:8000"
 
 /** Error carrying the HTTP status and the human-readable API detail. */
 export class ApiError extends Error {

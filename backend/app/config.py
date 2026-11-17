@@ -22,13 +22,15 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def use_psycopg3_driver(cls, value: str) -> str:
-        """Rewrite bare postgresql:// URLs to the installed psycopg 3 driver.
+        """Rewrite bare postgres:// / postgresql:// URLs to the psycopg 3 driver.
 
-        Providers like Railway hand out postgresql:// URLs; SQLAlchemy would
-        then pick psycopg2, which is not in requirements.txt.
+        Providers like Railway hand out postgresql:// (or postgres://) URLs;
+        SQLAlchemy would otherwise pick psycopg2, which is not in
+        requirements.txt.
         """
-        if value.startswith("postgresql://"):
-            return "postgresql+psycopg://" + value[len("postgresql://"):]
+        for prefix in ("postgresql://", "postgres://"):
+            if value.startswith(prefix):
+                return "postgresql+psycopg://" + value[len(prefix):]
         return value
 
 
