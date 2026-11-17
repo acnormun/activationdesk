@@ -21,8 +21,10 @@ npm install
 npm run dev # http://localhost:3000
 ```
 
-The backend origin comes from `VITE_API_BASE`; override without editing
-code: `VITE_API_BASE=http://127.0.0.1:9000 npm run dev`.
+The backend origin is read at runtime from `/config.js` (`window.__API_BASE__`),
+defaulting to `http://localhost:8000`. To point elsewhere in local dev, edit
+`public/config.js`. In Docker, set the `API_BASE` environment variable (nginx
+rewrites `config.js` at container start).
 
 ## Test and build
 
