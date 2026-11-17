@@ -24,14 +24,6 @@ class GuardOrderTests(ApiTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("follow-up date", response.json()["detail"])
 
-    def test_target_date_before_start_is_422(self) -> None:
-        self.login("manager", "manager123")
-        response = self.client.post(
-            "/accounts/alpha/target-date", json={"target_date": "2020-01-01"}
-        )
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("start date", response.json()["detail"])
-
     def test_value_evidence_missing_fields_is_422(self) -> None:
         self.login("manager", "manager123")
         response = self.client.post(

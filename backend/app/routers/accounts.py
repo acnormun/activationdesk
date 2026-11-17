@@ -21,7 +21,6 @@ from ..business import (
     RECORD_PROGRESS,
     RECORD_VALUE_EVIDENCE,
     SET_NEXT_ACTION,
-    SET_TARGET_DATE,
     ACTIVITY_MILESTONES,
     UPDATE_MILESTONE,
 )
@@ -42,7 +41,6 @@ from ..schemas import (
     MilestoneOut,
     NoteRequest,
     SetNextActionRequest,
-    SetTargetDateRequest,
 )
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -140,30 +138,6 @@ def assign_owner(
         account.owner = owner
 
     apply_change(db, account, actor.role, ASSIGN_OWNER, mutate, f"Owner set to '{owner}'.")
-    return account_out(account)
-
-
-@router.post("/{slug}/target-date", response_model=AccountOut)
-def set_target_date(
-    slug: str,
-    body: SetTargetDateRequest,
-    actor: Actor = Depends(get_actor),
-    account: Account = Depends(get_scoped_account),
-    db: Session = Depends(get_db),
-) -> AccountOut:
-    """Set a new target date."""
-    reason = validate_action(SET_TARGET_DATE, account, body.model_dump())
-    if reason:
-        raise HTTPException(status_code=422, detail=reason)
-    target = body.target_date
-
-    def mutate() -> None:
-        account.target_date = target
-
-    apply_change(
-        db, account, actor.role, SET_TARGET_DATE, mutate,
-        f"Target date set to {target.isoformat()}.",
-    )
     return account_out(account)
 
 
@@ -306,23 +280,20 @@ def close_internal_blocker(
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
-    """Close the internal blocker and record the next step."""
+    """Close the internal blocker and record what was fixed."""
     reason = validate_action(CLOSE_INTERNAL_BLOCKER, account, body.model_dump())
     if reason:
         raise HTTPException(status_code=422, detail=reason)
-    next_step = body.next_step.strip()
-    follow_up = body.follow_up_date
+    note = body.resolution_note.strip()
 
     def mutate() -> None:
         account.internal_blocker = None
         account.internal_blocker_milestone = None
         account.internal_blocker_opened_at = None
-        account.next_action = next_step
-        account.follow_up_date = follow_up
 
     apply_change(
         db, account, actor.role, CLOSE_INTERNAL_BLOCKER, mutate,
-        f"Internal blocker closed. Next step: {next_step} (follow-up {follow_up.isoformat()}).",
+        f"Internal blocker closed. Resolution: {note}",
     )
     return account_out(account)
 
@@ -335,25 +306,20 @@ def close_customer_blocker(
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
-    """Close the customer blocker with a (simulated) customer update and a next step."""
+    """Close the customer blocker with a (simulated) customer update."""
     reason = validate_action(CLOSE_CUSTOMER_BLOCKER, account, body.model_dump())
     if reason:
         raise HTTPException(status_code=422, detail=reason)
     update_text = body.customer_update.strip()
-    next_step = body.next_step.strip()
-    follow_up = body.follow_up_date
 
     def mutate() -> None:
         account.customer_blocker = None
         account.customer_blocker_milestone = None
         account.customer_blocker_opened_at = None
-        account.next_action = next_step
-        account.follow_up_date = follow_up
 
     apply_change(
         db, account, actor.role, CLOSE_CUSTOMER_BLOCKER, mutate,
-        f"Simulated customer update: {update_text}. Next step: {next_step} "
-        f"(follow-up {follow_up.isoformat()}).",
+        f"Simulated customer update: {update_text}",
         simulated=True,
     )
     return account_out(account)

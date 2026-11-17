@@ -12,7 +12,6 @@ import {
   recordProgress,
   recordValueEvidence,
   setNextAction,
-  setTargetDate,
 } from "@/api/client"
 import {
   buildMilestones,
@@ -38,7 +37,6 @@ const errorMessage = ref("")
 const working = ref(false)
 const openForm = ref("")
 const ownerInput = ref("")
-const targetDateInput = ref("")
 const nextActionInput = ref("")
 const followUpInput = ref(today.value)
 const progressInput = ref("")
@@ -47,10 +45,7 @@ const blockerMilestoneInput = ref("")
 const customerBlockerInput = ref("")
 const customerBlockerMilestoneInput = ref("")
 const customerUpdateInput = ref("")
-const customerCloseNextStep = ref("")
-const customerCloseFollowUp = ref(today.value)
-const internalCloseNextStep = ref("")
-const internalCloseFollowUp = ref(today.value)
+const internalCloseNote = ref("")
 const evidenceForm = ref({
   approved_by: "",
   invoice_ref: "",
@@ -189,9 +184,8 @@ watch(slug, async (value) => {
               Close blocker
             </button>
           </div>
-          <form v-if="openForm === 'internal-blocker-close'" class="account-action-form" @submit.prevent="run(() => closeInternalBlocker(account!.slug, internalCloseNextStep, internalCloseFollowUp))">
-            <label>Next step (required) <input v-model="internalCloseNextStep" type="text" required /></label>
-            <label>Follow-up date <input v-model="internalCloseFollowUp" type="date" required /></label>
+          <form v-if="openForm === 'internal-blocker-close'" class="account-action-form" @submit.prevent="run(() => closeInternalBlocker(account!.slug, internalCloseNote))">
+            <label>What was fixed? (resolution note) <input v-model="internalCloseNote" type="text" required /></label>
             <button type="submit" class="btn btn-secondary btn-sm" :disabled="working">Close blocker</button>
           </form>
 
@@ -204,10 +198,8 @@ watch(slug, async (value) => {
               Record customer update
             </button>
           </div>
-          <form v-if="openForm === 'customer-blocker'" class="account-action-form" @submit.prevent="run(() => closeCustomerBlocker(account!.slug, customerUpdateInput, customerCloseNextStep, customerCloseFollowUp))">
-            <label>Simulated customer update (required) <input v-model="customerUpdateInput" type="text" required /></label>
-            <label>Next step / escalation (required) <input v-model="customerCloseNextStep" type="text" required /></label>
-            <label>Follow-up date <input v-model="customerCloseFollowUp" type="date" required /></label>
+          <form v-if="openForm === 'customer-blocker'" class="account-action-form" @submit.prevent="run(() => closeCustomerBlocker(account!.slug, customerUpdateInput))">
+            <label>What did the customer provide? (simulated update) <input v-model="customerUpdateInput" type="text" required /></label>
             <button type="submit" class="btn btn-secondary btn-sm" :disabled="working">Close customer blocker</button>
           </form>
 
@@ -237,23 +229,17 @@ watch(slug, async (value) => {
         </div>
         <div class="card-body">
           <div class="detail-actions">
-            <button type="button" class="btn btn-secondary btn-sm" @click="toggleForm('owner')">Assign owner</button>
-            <button type="button" class="btn btn-secondary btn-sm" @click="toggleForm('target-date')">Set target date</button>
-            <button type="button" class="btn btn-secondary btn-sm" @click="toggleForm('next-action')">Set next action</button>
-            <button type="button" class="btn btn-secondary btn-sm" @click="toggleForm('progress')">Record progress</button>
-            <button v-if="!account.internal_blocker" type="button" class="btn btn-secondary btn-sm" @click="toggleForm('internal-blocker')">Open internal blocker</button>
-            <button v-if="!account.customer_blocker" type="button" class="btn btn-secondary btn-sm" @click="toggleForm('customer-blocker-open')">Open customer blocker</button>
-            <button v-if="!account.evidence_approved_by" type="button" class="btn btn-primary btn-sm" @click="toggleForm('value-evidence')">Confirm first value</button>
+            <button type="button" class="btn btn-secondary btn-sm" :class="{ 'is-active': openForm === 'owner' }" @click="toggleForm('owner')">Assign owner</button>
+            <button type="button" class="btn btn-secondary btn-sm" :class="{ 'is-active': openForm === 'next-action' }" @click="toggleForm('next-action')">Set next action</button>
+            <button type="button" class="btn btn-secondary btn-sm" :class="{ 'is-active': openForm === 'progress' }" @click="toggleForm('progress')">Record progress</button>
+            <button v-if="!account.internal_blocker" type="button" class="btn btn-secondary btn-sm" :class="{ 'is-active': openForm === 'internal-blocker' }" @click="toggleForm('internal-blocker')">Open internal blocker</button>
+            <button v-if="!account.customer_blocker" type="button" class="btn btn-secondary btn-sm" :class="{ 'is-active': openForm === 'customer-blocker-open' }" @click="toggleForm('customer-blocker-open')">Open customer blocker</button>
+            <button v-if="!account.evidence_approved_by" type="button" class="btn btn-primary btn-sm" :class="{ 'is-active': openForm === 'value-evidence' }" @click="toggleForm('value-evidence')">Confirm first value</button>
           </div>
 
           <form v-if="openForm === 'owner'" class="account-action-form" @submit.prevent="run(() => assignOwner(account!.slug, ownerInput))">
             <label>Owner name <input v-model="ownerInput" type="text" required /></label>
             <button type="submit" class="btn btn-secondary btn-sm" :disabled="working">Save owner</button>
-          </form>
-
-          <form v-if="openForm === 'target-date'" class="account-action-form" @submit.prevent="run(() => setTargetDate(account!.slug, targetDateInput))">
-            <label>Target date <input v-model="targetDateInput" type="date" required /></label>
-            <button type="submit" class="btn btn-secondary btn-sm" :disabled="working">Save target date</button>
           </form>
 
           <form v-if="openForm === 'next-action'" class="account-action-form" @submit.prevent="run(() => setNextAction(account!.slug, nextActionInput, followUpInput))">

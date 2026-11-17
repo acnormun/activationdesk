@@ -1222,8 +1222,8 @@ a {
   flex-direction: row;
 }
 
-.account-action-form button,
-.blocker-box button {
+.account-action-form button:not(.btn),
+.blocker-box button:not(.btn) {
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: var(--surface);
@@ -1233,8 +1233,8 @@ a {
   cursor: pointer;
 }
 
-.account-action-form button:hover,
-.blocker-box button:hover {
+.account-action-form button:not(.btn):hover,
+.blocker-box button:not(.btn):hover {
   background: var(--surface-2);
 }
 
@@ -1608,9 +1608,19 @@ a {
 }
 
 .detail-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 8px;
-  flex-wrap: wrap;
+}
+
+.detail-actions .btn {
+  width: 100%;
+}
+
+.detail-actions .btn.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .card {

@@ -11,7 +11,6 @@ from .models import Account
 VIEW_DASHBOARD = "view_dashboard"
 VIEW_ACCOUNT = "view_account"
 ASSIGN_OWNER = "assign_owner"
-SET_TARGET_DATE = "set_target_date"
 SET_NEXT_ACTION = "set_next_action"
 RECORD_PROGRESS = "record_progress"
 OPEN_INTERNAL_BLOCKER = "open_internal_blocker"
@@ -36,7 +35,6 @@ from .facts import has_evidence
 
 MUTATING_ACTIONS = {
     ASSIGN_OWNER,
-    SET_TARGET_DATE,
     SET_NEXT_ACTION,
     RECORD_PROGRESS,
     OPEN_INTERNAL_BLOCKER,
@@ -55,11 +53,6 @@ def validate_action(action: str, account: Account, payload: dict) -> str | None:
 
     if action == ASSIGN_OWNER and not (payload.get("owner") or "").strip():
         return "Owner name is required."
-    if action == SET_TARGET_DATE:
-        if payload.get("target_date") is None:
-            return "Target date is required."
-        if payload["target_date"] < account.start_date:
-            return "Target date cannot be before the start date."
     if action == SET_NEXT_ACTION:
         if not (payload.get("next_action") or "").strip():
             return "Next action description is required."
@@ -84,19 +77,13 @@ def validate_action(action: str, account: Account, payload: dict) -> str | None:
     if action == CLOSE_INTERNAL_BLOCKER:
         if not account.internal_blocker:
             return "No internal blocker is open."
-        if not (payload.get("next_step") or "").strip():
-            return "A next step is required to close the blocker."
-        if payload.get("follow_up_date") is None:
-            return "A follow-up date is required for the next step."
+        if not (payload.get("resolution_note") or "").strip():
+            return "A resolution note is required to close the blocker: record what was fixed."
     if action == CLOSE_CUSTOMER_BLOCKER:
         if not account.customer_blocker:
             return "No customer blocker is open."
         if not (payload.get("customer_update") or "").strip():
             return "Closing a customer blocker requires a (simulated) customer update."
-        if not (payload.get("next_step") or "").strip():
-            return "A next step is required to close the blocker."
-        if payload.get("follow_up_date") is None:
-            return "A follow-up date is required for the next step."
     if action == RECORD_VALUE_EVIDENCE and has_evidence(account):
         return "First value is already registered with evidence."
     if action == UPDATE_MILESTONE:

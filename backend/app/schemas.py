@@ -34,10 +34,6 @@ class AssignOwnerRequest(BaseModel):
     owner: str | None = None
 
 
-class SetTargetDateRequest(BaseModel):
-    target_date: date | None = None
-
-
 class SetNextActionRequest(BaseModel):
     next_action: str | None = None
     follow_up_date: date | None = None
@@ -54,13 +50,10 @@ class BlockerRequest(BaseModel):
 
 class CustomerUpdateRequest(BaseModel):
     customer_update: str | None = None
-    next_step: str | None = None
-    follow_up_date: date | None = None
 
 
 class CloseInternalBlockerRequest(BaseModel):
-    next_step: str | None = None
-    follow_up_date: date | None = None
+    resolution_note: str | None = None
 
 
 class EvidenceRequest(BaseModel):

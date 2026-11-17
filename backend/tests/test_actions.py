@@ -71,30 +71,23 @@ class ActionTests(ApiTestCase):
         self.login("manager", "manager123")
         response = self.client.post(
             "/accounts/alpha/internal-blocker/close",
-            json={
-                "next_step": "Re-run the corrected sample import",
-                "follow_up_date": str(date.today() + timedelta(days=1)),
-            },
+            json={"resolution_note": "Fixed the sample-data mapping"},
         )
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["status"], "on_track")
-        self.assertEqual(response.json()["next_action"], "Re-run the corrected sample import")
+        self.assertIsNone(response.json()["internal_blocker"])
 
-    def test_close_internal_blocker_requires_next_step(self) -> None:
+    def test_close_internal_blocker_requires_resolution_note(self) -> None:
         self.login("manager", "manager123")
         response = self.client.post("/accounts/alpha/internal-blocker/close", json={})
         self.assertEqual(response.status_code, 422)
-        self.assertIn("next step", response.json()["detail"])
+        self.assertIn("resolution note", response.json()["detail"])
 
     def test_close_customer_blocker_records_manager_role(self) -> None:
         self.login("manager", "manager123")
         response = self.client.post(
             "/accounts/beta/customer-blocker/close",
-            json={
-                "customer_update": "Client confirmed the data feed.",
-                "next_step": "Ask the finance lead for the policy deadline",
-                "follow_up_date": str(date.today() + timedelta(days=1)),
-            },
+            json={"customer_update": "Client confirmed the data feed."},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["status"], "on_track")
@@ -137,11 +130,7 @@ class ActionTests(ApiTestCase):
         self.login("manager", "manager123")
         response = self.client.post(
             "/accounts/beta/customer-blocker/close",
-            json={
-                "customer_update": "Client confirmed the data feed.",
-                "next_step": "Validate the new mapping",
-                "follow_up_date": str(date.today() + timedelta(days=1)),
-            },
+            json={"customer_update": "Client confirmed the data feed."},
         )
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.json()["customer_blocker_milestone"])
@@ -211,11 +200,7 @@ class ActionTests(ApiTestCase):
         self.login("manager", "manager123")
         response = self.client.post(
             "/accounts/beta/customer-blocker/close",
-            json={
-                "customer_update": "Client confirmed the approval policy.",
-                "next_step": "Escalate to the finance lead",
-                "follow_up_date": str(date.today() + timedelta(days=1)),
-            },
+            json={"customer_update": "Client confirmed the approval policy."},
         )
         self.assertEqual(response.status_code, 200)
         detail = self.client.get("/accounts/beta").json()

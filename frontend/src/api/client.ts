@@ -72,10 +72,6 @@ export function assignOwner(slug: string, owner: string): Promise<Account> {
   return postJson(`/accounts/${slug}/owner`, { owner })
 }
 
-export function setTargetDate(slug: string, targetDate: string): Promise<Account> {
-  return postJson(`/accounts/${slug}/target-date`, { target_date: targetDate })
-}
-
 export function setNextAction(
   slug: string,
   nextAction: string,
@@ -109,25 +105,19 @@ export function openCustomerBlocker(
 
 export function closeInternalBlocker(
   slug: string,
-  nextStep: string,
-  followUpDate: string,
+  resolutionNote: string,
 ): Promise<Account> {
   return postJson(`/accounts/${slug}/internal-blocker/close`, {
-    next_step: nextStep,
-    follow_up_date: followUpDate,
+    resolution_note: resolutionNote,
   })
 }
 
 export function closeCustomerBlocker(
   slug: string,
   customerUpdate: string,
-  nextStep: string,
-  followUpDate: string,
 ): Promise<Account> {
   return postJson(`/accounts/${slug}/customer-blocker/close`, {
     customer_update: customerUpdate,
-    next_step: nextStep,
-    follow_up_date: followUpDate,
   })
 }
 
