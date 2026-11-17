@@ -57,7 +57,11 @@ class CustomerUpdateRequest(BaseModel):
 
 
 class EvidenceRequest(BaseModel):
-    evidence: str | None = None
+    approved_by: str
+    invoice_ref: str
+    via_agreed_workflow: bool
+    approved_at: date
+    recorded_by: str
 
 
 class HistoryOut(BaseModel):
@@ -76,7 +80,9 @@ class AccountOut(BaseModel):
     id: int
     slug: str
     name: str
+    desired_outcome: str = ""
     owner: str | None = None
+    last_reviewed_at: date | None = None
     start_date: date
     target_date: date
     status: str

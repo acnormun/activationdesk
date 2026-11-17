@@ -15,7 +15,8 @@ from .permissions import (
     SET_NEXT_ACTION,
     SET_TARGET_DATE,
 )
-from .pipeline import ACTIVATED
+from .domain.models import Status
+from .facts import has_evidence
 
 MUTATING_ACTIONS = {
     ASSIGN_OWNER,
@@ -31,7 +32,7 @@ MUTATING_ACTIONS = {
 
 def validate_action(action: str, account: Account, payload: dict) -> str | None:
     """Return the reason to reject (HTTP 422), or None when allowed."""
-    if action in MUTATING_ACTIONS and account.status == ACTIVATED:
+    if action in MUTATING_ACTIONS and account.status == Status.ACTIVATED.value:
         return "Account is activated: no further intervention is allowed."
 
     if action == ASSIGN_OWNER and not (payload.get("owner") or "").strip():
@@ -62,9 +63,6 @@ def validate_action(action: str, account: Account, payload: dict) -> str | None:
             return "No customer blocker is open."
         if not (payload.get("customer_update") or "").strip():
             return "Closing a customer blocker requires a (simulated) customer update."
-    if action == RECORD_VALUE_EVIDENCE:
-        if not (payload.get("evidence") or "").strip():
-            return "Activation requires value evidence."
-        if account.first_value_done:
-            return "First value is already registered with evidence."
+    if action == RECORD_VALUE_EVIDENCE and has_evidence(account):
+        return "First value is already registered with evidence."
     return None

@@ -9,7 +9,7 @@ from .auth import router as auth_router
 from .database import Base, SessionLocal, engine, get_db
 from .deps import Actor, get_actor
 from .permissions import ALL_ACTIONS, ROLE_ACTIONS
-from .routers import accounts
+from .routers import accounts, plan
 from .seed import ensure_demo_users
 
 
@@ -38,6 +38,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(accounts.router)
+app.include_router(plan.router)
 
 
 @app.get("/health")

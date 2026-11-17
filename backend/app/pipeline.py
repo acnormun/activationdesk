@@ -1,14 +1,4 @@
-"""Pipeline 1 - status recalculation (first match wins).
 
-    first value done WITH evidence  -> activated (no intervention)
-    customer blocker open           -> waiting_on_customer (nudge lane)
-    internal blocker open           -> blocked_internal (slot ranking)
-    target date passed              -> overdue (slot ranking)
-    otherwise                       -> on_track (monitor)
-
-The status column only stores the last computed value; it is recalculated
-from the facts after every saved change and never written by hand.
-"""
 
 from datetime import date, datetime, timezone
 

@@ -25,7 +25,12 @@ from ..permissions import (
     VIEW_DASHBOARD,
     require_permission,
 )
-from ..pipeline import compute_flags, recalculate_status
+from datetime import date
+
+from ..domain.models import Evidence, Milestone, MilestoneKind, MilestoneStatus
+from ..domain.status import derive_status
+from ..facts import recalculate, to_domain
+from ..domain.validation import validate_evidence
 from ..schemas import (
     AccountOut,
     AssignOwnerRequest,
@@ -42,9 +47,15 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 
 def account_out(account: Account) -> AccountOut:
-    """Serialize an account with the flags derived from its facts."""
+    """Serialize an account; status and flags come from the domain layer."""
     data = AccountOut.model_validate(account)
-    return data.model_copy(update={"flags": compute_flags(account)})
+    result = derive_status(to_domain(account), date.today())
+    return data.model_copy(
+        update={
+            "status": result.status.value,
+            "flags": [flag.value for flag in result.flags],
+        }
+    )
 
 
 def apply_change(
@@ -55,9 +66,9 @@ def apply_change(
     mutate,
     detail: str,
 ) -> None:
-    """One transaction: fact change + history entry + status recalculation."""
+    """One transaction: fact change + history entry + domain recalculation."""
     mutate()
-    recalculate_status(account)
+    recalculate(account)
     db.add(
         HistoryEntry(
             account_id=account.id,
@@ -281,18 +292,41 @@ def record_value_evidence(
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
-    """Register the first value with evidence (activates via Pipeline 1)."""
-    reason = validate_action(RECORD_VALUE_EVIDENCE, account, body.model_dump())
+    """Record first-value evidence; the domain layer validates it before
+    saving (activation still comes only from valid evidence)."""
+    today = date.today()
+    evidence = Evidence(
+        approved_by=body.approved_by,
+        invoice_ref=body.invoice_ref,
+        via_agreed_workflow=body.via_agreed_workflow,
+        approved_at=body.approved_at,
+        recorded_by=body.recorded_by,
+    )
+    milestone = Milestone(
+        name="First value",
+        kind=MilestoneKind.VALUE,
+        order=1,
+        status=MilestoneStatus.DONE,
+        completed_at=evidence.approved_at,
+        evidence=evidence,
+    )
+    reason = validate_action(RECORD_VALUE_EVIDENCE, account, {})
     if reason:
         raise HTTPException(status_code=422, detail=reason)
-    evidence = body.evidence.strip()
+    errors = validate_evidence(evidence, milestone, today)
+    if errors:
+        raise HTTPException(status_code=422, detail=" ".join(errors))
 
     def mutate() -> None:
-        account.first_value_done = True
-        account.value_evidence = evidence
+        account.evidence_approved_by = evidence.approved_by
+        account.evidence_invoice_ref = evidence.invoice_ref
+        account.evidence_workflow_confirmed = evidence.via_agreed_workflow
+        account.evidence_approved_at = evidence.approved_at
+        account.evidence_recorded_by = evidence.recorded_by
 
     apply_change(
         db, account, actor.role, RECORD_VALUE_EVIDENCE, mutate,
-        f"Value evidence: {evidence}",
+        f"Value evidence: invoice {evidence.invoice_ref} approved by "
+        f"{evidence.approved_by}.",
     )
     return account_out(account)

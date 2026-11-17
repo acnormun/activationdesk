@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from .models import Account, DemoWorkspace, Role, User
-from .pipeline import recalculate_status
+from .facts import recalculate
 from .security import hash_password
 
 DEMO_USERS = [
@@ -45,6 +45,7 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             workspace_id=workspace.id,
             slug="alpha",
             name="Alpha Corp",
+            desired_outcome="Reporting dashboard adopted by the client team",
             owner="Dana Reed",
             start_date=today - timedelta(days=15),
             target_date=today + timedelta(days=15),
@@ -55,6 +56,7 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             workspace_id=workspace.id,
             slug="beta",
             name="Beta LLC",
+            desired_outcome="Daily data feed live for invoice tracking",
             owner="Dana Reed",
             start_date=today - timedelta(days=10),
             target_date=today + timedelta(days=5),
@@ -65,6 +67,7 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             workspace_id=workspace.id,
             slug="gamma",
             name="Gamma Partners",
+            desired_outcome="Invoice workflow migrated to the new portal",
             start_date=today - timedelta(days=30),
             target_date=today - timedelta(days=2),
         ),
@@ -72,6 +75,7 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             workspace_id=workspace.id,
             slug="delta",
             name="Delta Systems",
+            desired_outcome="Bulk invoice import enabled",
             owner="Evan Ortiz",
             start_date=today - timedelta(days=12),
             target_date=today + timedelta(days=18),
@@ -82,14 +86,18 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             workspace_id=workspace.id,
             slug="epsilon",
             name="Epsilon Group",
+            desired_outcome="First-value invoice processed end to end",
             owner="Dana Reed",
             start_date=today - timedelta(days=25),
             target_date=today + timedelta(days=5),
-            first_value_done=True,
-            value_evidence="First value delivered: reporting dashboard is live.",
+            evidence_approved_by="Morgan Lee",
+            evidence_invoice_ref="INV-2041",
+            evidence_workflow_confirmed=True,
+            evidence_approved_at=today,
+            evidence_recorded_by="Dana Reed",
         ),
     ]
     for account in accounts:
-        recalculate_status(account)
+        recalculate(account)
     db.add_all(accounts)
     db.commit()

@@ -38,7 +38,9 @@ class GuardOrderTests(ApiTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("start date", response.json()["detail"])
 
-    def test_value_evidence_cannot_be_empty(self) -> None:
+    def test_value_evidence_missing_fields_is_422(self) -> None:
         self.login("manager", "manager123")
-        response = self.client.post("/accounts/alpha/value-evidence", json={"evidence": "   "})
+        response = self.client.post(
+            "/accounts/alpha/value-evidence", json={"approved_by": "Morgan Lee"}
+        )
         self.assertEqual(response.status_code, 422)
