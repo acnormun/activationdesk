@@ -1702,3 +1702,123 @@ a {
 .text-link:hover {
   text-decoration: underline;
 }
+
+/* Path to first value (timeline) */
+.path-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.path-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  position: relative;
+  padding-bottom: 14px;
+}
+
+.path-item:last-child {
+  padding-bottom: 0;
+}
+
+.path-item::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 22px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.path-item:last-child::before {
+  display: none;
+}
+
+.path-marker {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  z-index: 1;
+  flex: none;
+}
+
+.path-item.done .path-marker {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.path-item.is-value.pending .path-marker {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.path-item.is-value.pending .path-dot {
+  background: var(--amber);
+}
+
+.path-value-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--amber);
+  background: var(--amber-soft);
+  border: 1px solid var(--amber-line);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.path-item.done .path-value-tag {
+  color: var(--green);
+  background: var(--green-soft);
+  border-color: var(--green-line);
+}
+
+.path-check {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.path-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.path-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.path-label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.path-detail {
+  font-size: 11.5px;
+  color: var(--faint);
+  line-height: 1.45;
+}

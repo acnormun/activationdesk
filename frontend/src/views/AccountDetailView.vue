@@ -158,15 +158,28 @@ watch(slug, async (value) => {
               :style="{ width: `${milestones.length ? Math.round((milestones.filter((m) => m.state === 'done').length / milestones.length) * 100) : 0}%` }"
             ></div>
           </div>
-          <ul class="milestones">
-            <li v-for="check in milestones" :key="check.label">
-              <span class="milestone-badge" :class="`milestone-${check.state}`">{{ check.state }}</span>
-              <span class="milestone-text">
-                <span class="milestone-label">{{ check.label }}</span>
-                <span class="milestone-detail">{{ check.detail }}</span>
+          <ol class="path-timeline">
+            <li
+              v-for="check in milestones"
+              :key="check.label"
+              class="path-item"
+              :class="{ done: check.state === 'done', 'is-value': check.label === 'First value' }"
+            >
+              <span class="path-marker" aria-hidden="true">
+                <svg v-if="check.state === 'done'" viewBox="0 0 20 20" class="path-check">
+                  <path d="M4 10.5l4 4 8-9" />
+                </svg>
+                <span v-else class="path-dot"></span>
               </span>
+              <div class="path-body">
+                <span class="path-label">
+                  {{ check.label }}
+                  <span v-if="check.label === 'First value'" class="path-value-tag">key result</span>
+                </span>
+                <span class="path-detail">{{ check.detail }}</span>
+              </div>
             </li>
-          </ul>
+          </ol>
         </div>
       </section>
 
