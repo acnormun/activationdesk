@@ -85,6 +85,46 @@ class ActionTests(ApiTestCase):
         pairs = [(h["action"], h["actor_role"]) for h in detail["history"]]
         self.assertIn(("close_customer_blocker", "onboarding_manager"), pairs)
 
+    def test_open_internal_blocker_with_milestone_records_reference(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/delta/internal-blocker",
+            json={
+                "description": "Sample mapping blocked the import",
+                "milestone": "import",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["internal_blocker_milestone"], "import")
+        self.assertEqual(response.json()["status"], "blocked_internal")
+        detail = self.client.get("/accounts/delta").json()
+        self.assertIn("holds up: import", detail["history"][0]["detail"])
+
+    def test_open_internal_blocker_rejects_unknown_milestone(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/delta/internal-blocker",
+            json={"description": "Stuck", "milestone": "go_live"},
+        )
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("Unknown milestone", response.json()["detail"])
+
+    def test_seeded_blockers_reference_their_milestones(self) -> None:
+        self.login("manager", "manager123")
+        accounts = {a["slug"]: a for a in self.client.get("/accounts").json()}
+        self.assertEqual(accounts["alpha"]["internal_blocker_milestone"], "import")
+        self.assertEqual(accounts["beta"]["customer_blocker_milestone"], "first_value")
+        self.assertEqual(accounts["zeta"]["internal_blocker_milestone"], "first_value")
+
+    def test_close_customer_blocker_clears_milestone_reference(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/beta/customer-blocker/close",
+            json={"customer_update": "Client confirmed the data feed."},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json()["customer_blocker_milestone"])
+
     def test_milestone_marked_done_records_fact_and_history(self) -> None:
         self.login("manager", "manager123")
         response = self.client.post("/accounts/delta/milestones/setup")
@@ -113,3 +153,47 @@ class ActionTests(ApiTestCase):
         response = self.client.post("/accounts/gamma/milestones/training")
         self.assertEqual(response.status_code, 422)
         self.assertIn("activated", response.json()["detail"])
+
+    def test_open_customer_blocker_sets_waiting_on_customer(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/delta/customer-blocker",
+            json={
+                "description": "Customer needs legal sign-off",
+                "milestone": "first_value",
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["customer_blocker"], "Customer needs legal sign-off")
+        self.assertEqual(response.json()["customer_blocker_milestone"], "first_value")
+        self.assertEqual(response.json()["status"], "waiting_on_customer")
+
+    def test_open_internal_blocker_requires_milestone(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/delta/internal-blocker",
+            json={"description": "Stuck without a milestone"},
+        )
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("milestone is required", response.json()["detail"])
+
+    def test_open_customer_blocker_requires_milestone(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/delta/customer-blocker",
+            json={"description": "Stuck without a milestone"},
+        )
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("milestone is required", response.json()["detail"])
+
+    def test_close_customer_blocker_marks_history_simulated(self) -> None:
+        self.login("manager", "manager123")
+        response = self.client.post(
+            "/accounts/beta/customer-blocker/close",
+            json={"customer_update": "Client confirmed the approval policy."},
+        )
+        self.assertEqual(response.status_code, 200)
+        detail = self.client.get("/accounts/beta").json()
+        entry = detail["history"][0]
+        self.assertTrue(entry["simulated"])
+        self.assertIn("Simulated", entry["detail"])

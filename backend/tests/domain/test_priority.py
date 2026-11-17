@@ -57,18 +57,18 @@ class PlanWeekSeedTests(unittest.TestCase):
         self.assertEqual(self._names(Lane.MONITOR), ["Delta LLC"])
         self.assertEqual(self._names(Lane.NO_INTERVENTION), ["Gamma SA"])
 
-    def test_alpha_score_breakdown_40_10_20_10(self):
+    def test_alpha_score_breakdown_40_10_10_10(self):
         entry = self.plan.intervention[0]
         breakdown = entry.score
         self.assertEqual(breakdown.urgency.points, 40)
         self.assertEqual(breakdown.stagnation.points, 10)
-        self.assertEqual(breakdown.closeness.points, 20)
+        self.assertEqual(breakdown.closeness.points, 10)
         self.assertEqual(breakdown.followup.points, 10)
-        self.assertEqual(breakdown.total, 80)
+        self.assertEqual(breakdown.total, 70)
         self.assertEqual(breakdown.not_calculated, ())
         self.assertEqual(entry.reason, (
-            "Intervention slot 1: score 80 (urgency 40, stagnation 10, "
-            "closeness 20, follow-up 10)."
+            "Intervention slot 1: score 70 (urgency 40, stagnation 10, "
+            "closeness 10, follow-up 10)."
         ))
 
     def test_zeta_score_breakdown_40_0_20_10(self):

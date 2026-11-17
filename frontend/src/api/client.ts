@@ -91,8 +91,20 @@ export function recordProgress(slug: string, note: string): Promise<Account> {
   return postJson(`/accounts/${slug}/progress`, { note })
 }
 
-export function openInternalBlocker(slug: string, description: string): Promise<Account> {
-  return postJson(`/accounts/${slug}/internal-blocker`, { description })
+export function openInternalBlocker(
+  slug: string,
+  description: string,
+  milestone?: string | null,
+): Promise<Account> {
+  return postJson(`/accounts/${slug}/internal-blocker`, { description, milestone })
+}
+
+export function openCustomerBlocker(
+  slug: string,
+  description: string,
+  milestone?: string | null,
+): Promise<Account> {
+  return postJson(`/accounts/${slug}/customer-blocker`, { description, milestone })
 }
 
 export function closeInternalBlocker(slug: string): Promise<Account> {

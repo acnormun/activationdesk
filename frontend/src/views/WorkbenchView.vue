@@ -32,6 +32,23 @@ const filtered = computed(() =>
 )
 const emptyMessage = computed(() => emptyFilterMessage(statusFilter.value, query.value))
 
+/** Data-driven summary: every number is derived from the accounts and plan. */
+const metrics = computed(() => {
+  const count = (status: string) =>
+    accounts.value.filter((account) => account.status === status).length
+  const slotsTotal = plan.value?.slots ?? 0
+  const slotsUsed = plan.value ? plan.value.slots - plan.value.empty_slots : 0
+  return [
+    { key: "accounts", label: "Accounts", value: String(accounts.value.length), tone: "neutral" },
+    { key: "activated", label: "Activated", value: String(count("activated")), tone: "activated" },
+    { key: "blocked", label: "Blocked", value: String(count("blocked_internal")), tone: "blocked" },
+    { key: "waiting", label: "Waiting on customer", value: String(count("waiting_on_customer")), tone: "waiting" },
+    { key: "overdue", label: "Overdue", value: String(count("overdue")), tone: "overdue" },
+    { key: "ontrack", label: "On track", value: String(count("on_track")), tone: "ontrack" },
+    { key: "slots", label: "Slots used", value: `${slotsUsed}/${slotsTotal}`, tone: "slots" },
+  ]
+})
+
 async function loadBoard(): Promise<void> {
   loading.value = true
   errorMessage.value = ""
@@ -89,15 +106,30 @@ onMounted(loadBoard)
 <template>
   <main class="workbench">
     <header class="workbench-header">
-      <h1>Activation Desk</h1>
+      <div>
+        <h1>Activation Desk</h1>
+        <p class="workbench-subtitle">Unblock two accounts this week and verify first value.</p>
+      </div>
       <div v-if="session.user" class="workbench-session">
         <span>{{ session.workspace?.name }}</span>
-        <span>{{ session.user.username }}</span>
+        <span class="workbench-user">{{ session.user.username }}</span>
         <button type="button" @click="onLogout">Sign out</button>
       </div>
     </header>
 
     <p v-if="errorMessage" class="board-error">{{ errorMessage }}</p>
+
+    <section class="metrics" aria-label="Summary metrics">
+      <div
+        v-for="metric in metrics"
+        :key="metric.key"
+        class="metric"
+        :class="`metric-${metric.tone}`"
+      >
+        <span class="metric-value">{{ metric.value }}</span>
+        <span class="metric-label">{{ metric.label }}</span>
+      </div>
+    </section>
 
     <section class="workbench-body">
       <div class="workbench-columns">
@@ -137,10 +169,16 @@ onMounted(loadBoard)
           </ul>
         </section>
       </div>
+    </section>
 
-      <section v-if="selectedSlug" class="account-detail">
-        <header class="account-detail-header">
-          <h2>History: {{ detail?.account.name ?? selectedSlug }}</h2>
+    <!-- Detail drawer -->
+    <Transition name="fade">
+      <div v-if="selectedSlug" class="drawer-overlay" @click="loadDetail('')"></div>
+    </Transition>
+    <Transition name="drawer">
+      <aside v-if="selectedSlug" class="drawer" aria-label="Account detail">
+        <header class="drawer-header">
+          <h2>{{ detail?.account.name ?? selectedSlug }}</h2>
           <button type="button" @click="loadDetail('')">Close</button>
         </header>
         <p v-if="!detail" class="panel-status">Loading history…</p>
@@ -150,11 +188,12 @@ onMounted(loadBoard)
             <li v-for="entry in detail.history" :key="entry.id">
               <span class="history-date">{{ entry.created_at.slice(0, 10) }}</span>
               <span class="history-action">{{ entry.action }}</span>
-              <span>{{ entry.detail }}</span>
+              <span v-if="entry.simulated" class="badge simulated">Simulated</span>
+              <span class="history-detail">{{ entry.detail }}</span>
             </li>
           </ol>
         </template>
-      </section>
-    </section>
+      </aside>
+    </Transition>
   </main>
 </template>

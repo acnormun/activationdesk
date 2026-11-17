@@ -15,6 +15,7 @@ SET_TARGET_DATE = "set_target_date"
 SET_NEXT_ACTION = "set_next_action"
 RECORD_PROGRESS = "record_progress"
 OPEN_INTERNAL_BLOCKER = "open_internal_blocker"
+OPEN_CUSTOMER_BLOCKER = "open_customer_blocker"
 CLOSE_INTERNAL_BLOCKER = "close_internal_blocker"
 CLOSE_CUSTOMER_BLOCKER = "close_customer_blocker"
 RECORD_VALUE_EVIDENCE = "record_value_evidence"
@@ -26,6 +27,10 @@ ACTIVITY_MILESTONES = {
     "import": "import_done_at",
     "training": "training_done_at",
 }
+
+# Milestones a blocker may reference: the three activity milestones plus
+# the first value milestone.
+BLOCKER_MILESTONES = {"setup", "import", "training", "first_value"}
 from .domain.models import Status
 from .facts import has_evidence
 
@@ -35,6 +40,7 @@ MUTATING_ACTIONS = {
     SET_NEXT_ACTION,
     RECORD_PROGRESS,
     OPEN_INTERNAL_BLOCKER,
+    OPEN_CUSTOMER_BLOCKER,
     CLOSE_INTERNAL_BLOCKER,
     CLOSE_CUSTOMER_BLOCKER,
     RECORD_VALUE_EVIDENCE,
@@ -63,11 +69,18 @@ def validate_action(action: str, account: Account, payload: dict) -> str | None:
             return "Next action requires a follow-up date."
     if action == RECORD_PROGRESS and not (payload.get("note") or "").strip():
         return "Progress note is required."
-    if action == OPEN_INTERNAL_BLOCKER:
+    if action in (OPEN_INTERNAL_BLOCKER, OPEN_CUSTOMER_BLOCKER):
         if not (payload.get("description") or "").strip():
             return "Blocker description is required."
-        if account.internal_blocker:
+        if action == OPEN_INTERNAL_BLOCKER and account.internal_blocker:
             return "An internal blocker is already open."
+        if action == OPEN_CUSTOMER_BLOCKER and account.customer_blocker:
+            return "A customer blocker is already open."
+        milestone = (payload.get("milestone") or "").strip()
+        if not milestone:
+            return "Blocker milestone is required: choose setup, import, training or first_value."
+        if milestone not in BLOCKER_MILESTONES:
+            return "Unknown milestone: use setup, import, training or first_value."
     if action == CLOSE_INTERNAL_BLOCKER and not account.internal_blocker:
         return "No internal blocker is open."
     if action == CLOSE_CUSTOMER_BLOCKER:

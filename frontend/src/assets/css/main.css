@@ -273,6 +273,11 @@ body {
   color: #5b21b6;
 }
 
+.badge.simulated {
+  background: #fde68a;
+  color: #78350f;
+}
+
 /* Accounts */
 .accounts-header {
   display: flex;
@@ -573,39 +578,188 @@ body {
   font-style: italic;
 }
 
-/* Detail and history */
-.account-detail {
-  margin-top: 24px;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
+/* Summary metrics */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 20px 0 4px;
 }
 
-.account-detail-header {
+.metric {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 4px;
+  border-top: 3px solid var(--muted);
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.metric-activated { border-top-color: #15803d; }
+.metric-blocked { border-top-color: #b45309; }
+.metric-waiting { border-top-color: #7c3aed; }
+.metric-overdue { border-top-color: var(--danger); }
+.metric-ontrack { border-top-color: var(--accent); }
+.metric-slots { border-top-color: #0e7490; }
+
+/* Account card status accent + milestone progress */
+.account-card.status-activated { border-left: 4px solid #15803d; }
+.account-card.status-on-track { border-left: 4px solid var(--accent); }
+.account-card.status-blocked-internal { border-left: 4px solid #b45309; }
+.account-card.status-waiting-on-customer { border-left: 4px solid #7c3aed; }
+.account-card.status-overdue { border-left: 4px solid var(--danger); }
+
+.milestones-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.milestones-head h4 {
+  margin: 0 0 6px;
+}
+
+.milestone-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.milestone-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #eef2f7;
+  overflow: hidden;
+  margin: 0 0 10px;
+}
+
+.milestone-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+/* Detail drawer */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  z-index: 40;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 400px;
+  max-width: 92vw;
+  background: #fff;
+  border-left: 1px solid var(--border);
+  box-shadow: -16px 0 40px rgba(0, 0, 0, 0.16);
+  z-index: 50;
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+.drawer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
 }
 
-.account-detail-header h2 {
+.drawer-header h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
+}
+
+.drawer-header button {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .history-list {
-  margin: 12px 0 0;
-  padding-left: 16px;
+  margin: 0;
+  padding-left: 0;
   display: grid;
-  gap: 6px;
+  gap: 10px;
   font-size: 13px;
+  list-style: none;
+}
+
+.history-list li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
 }
 
 .history-date {
   color: var(--muted);
   font-size: 12px;
-  margin-right: 8px;
 }
 
 .history-action {
   font-weight: 600;
-  margin-right: 8px;
+}
+
+.history-detail {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: transform 0.25s ease;
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+  transform: translateX(100%);
+}
+
+/* Workbench header extras */
+.workbench-subtitle {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.workbench-user {
+  font-weight: 600;
+  color: var(--text);
 }

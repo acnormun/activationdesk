@@ -16,6 +16,7 @@ from ..business import (
     ASSIGN_OWNER,
     CLOSE_CUSTOMER_BLOCKER,
     CLOSE_INTERNAL_BLOCKER,
+    OPEN_CUSTOMER_BLOCKER,
     OPEN_INTERNAL_BLOCKER,
     RECORD_PROGRESS,
     RECORD_VALUE_EVIDENCE,
@@ -73,6 +74,7 @@ def apply_change(
     action: str,
     mutate,
     detail: str,
+    simulated: bool = False,
 ) -> None:
     """One transaction: fact change + history entry + domain recalculation."""
     mutate()
@@ -83,6 +85,7 @@ def apply_change(
             actor_role=actor_role,
             action=action,
             detail=detail,
+            simulated=simulated,
         )
     )
     db.commit()
@@ -253,14 +256,43 @@ def open_internal_blocker(
     if reason:
         raise HTTPException(status_code=422, detail=reason)
     description = body.description.strip()
+    milestone = body.milestone.strip()
 
     def mutate() -> None:
         account.internal_blocker = description
+        account.internal_blocker_milestone = milestone
         account.internal_blocker_opened_at = utcnow()
 
     apply_change(
         db, account, actor.role, OPEN_INTERNAL_BLOCKER, mutate,
-        f"Internal blocker: {description}",
+        f"Internal blocker: {description} (holds up: {milestone})",
+    )
+    return account_out(account)
+
+
+@router.post("/{slug}/customer-blocker", response_model=AccountOut)
+def open_customer_blocker(
+    slug: str,
+    body: BlockerRequest,
+    actor: Actor = Depends(get_actor),
+    account: Account = Depends(get_scoped_account),
+    db: Session = Depends(get_db),
+) -> AccountOut:
+    """Open a customer blocker (the customer owns the dependency)."""
+    reason = validate_action(OPEN_CUSTOMER_BLOCKER, account, body.model_dump())
+    if reason:
+        raise HTTPException(status_code=422, detail=reason)
+    description = body.description.strip()
+    milestone = body.milestone.strip()
+
+    def mutate() -> None:
+        account.customer_blocker = description
+        account.customer_blocker_milestone = milestone
+        account.customer_blocker_opened_at = utcnow()
+
+    apply_change(
+        db, account, actor.role, OPEN_CUSTOMER_BLOCKER, mutate,
+        f"Customer blocker: {description} (holds up: {milestone})",
     )
     return account_out(account)
 
@@ -279,6 +311,7 @@ def close_internal_blocker(
 
     def mutate() -> None:
         account.internal_blocker = None
+        account.internal_blocker_milestone = None
         account.internal_blocker_opened_at = None
 
     apply_change(db, account, actor.role, CLOSE_INTERNAL_BLOCKER, mutate, "Internal blocker closed.")
@@ -301,11 +334,13 @@ def close_customer_blocker(
 
     def mutate() -> None:
         account.customer_blocker = None
+        account.customer_blocker_milestone = None
         account.customer_blocker_opened_at = None
 
     apply_change(
         db, account, actor.role, CLOSE_CUSTOMER_BLOCKER, mutate,
-        f"Customer blocker closed. Update: {update_text}",
+        f"Simulated customer update: {update_text}",
+        simulated=True,
     )
     return account_out(account)
 

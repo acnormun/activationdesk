@@ -73,8 +73,12 @@ class Account(Base):
     next_action: Mapped[str | None] = mapped_column(String(200), default=None)
     follow_up_date: Mapped[date | None] = mapped_column(Date, default=None)
     internal_blocker: Mapped[str | None] = mapped_column(String(200), default=None)
+    # Activity milestone (or first_value) this blocker is holding up.
+    internal_blocker_milestone: Mapped[str | None] = mapped_column(String(40), default=None)
     internal_blocker_opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     customer_blocker: Mapped[str | None] = mapped_column(String(200), default=None)
+    # Activity milestone (or first_value) this blocker is holding up.
+    customer_blocker_milestone: Mapped[str | None] = mapped_column(String(40), default=None)
     customer_blocker_opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     status: Mapped[str] = mapped_column(String(40), default="on_track")
     activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
@@ -93,6 +97,9 @@ class HistoryEntry(Base):
     actor_role: Mapped[str] = mapped_column(String(40))
     action: Mapped[str] = mapped_column(String(80))
     detail: Mapped[str] = mapped_column(Text, default="")
+    # True when the entry records a simulation (e.g. a customer update the
+    # manager recorded on the customer's behalf). Always false otherwise.
+    simulated: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     account: Mapped["Account"] = relationship(back_populates="history")

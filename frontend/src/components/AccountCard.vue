@@ -6,6 +6,7 @@ import {
   closeCustomerBlocker,
   closeInternalBlocker,
   markMilestoneDone,
+  openCustomerBlocker,
   openInternalBlocker,
   recordProgress,
   recordValueEvidence,
@@ -40,6 +41,15 @@ const menuOpen = ref(false)
 const cardRoot = ref<HTMLElement | null>(null)
 
 const milestones = computed(() => buildMilestones(props.account))
+const milestoneProgress = computed(() => {
+  const done = milestones.value.filter((m) => m.state === "done").length
+  return { done, total: milestones.value.length }
+})
+const milestonePct = computed(() =>
+  milestoneProgress.value.total
+    ? Math.round((milestoneProgress.value.done / milestoneProgress.value.total) * 100)
+    : 0,
+)
 
 const menuActions = computed(() => {
   const actions = [
@@ -59,6 +69,9 @@ const menuActions = computed(() => {
   if (!props.account.internal_blocker) {
     actions.push({ name: "internal-blocker", label: "Open internal blocker" })
   }
+  if (!props.account.customer_blocker) {
+    actions.push({ name: "customer-blocker-open", label: "Open customer blocker" })
+  }
   if (!props.account.evidence_approved_by) {
     actions.push({ name: "value-evidence", label: "Record value evidence" })
   }
@@ -71,6 +84,16 @@ const nextActionInput = ref("")
 const followUpInput = ref(props.today)
 const progressInput = ref("")
 const blockerInput = ref("")
+const blockerMilestoneInput = ref("")
+const customerBlockerInput = ref("")
+const customerBlockerMilestoneInput = ref("")
+
+const MILESTONE_LABELS: Record<string, string> = {
+  setup: "Setup",
+  import: "Import",
+  training: "Training",
+  first_value: "First value",
+}
 const customerUpdateInput = ref("")
 const evidenceForm = ref({
   approved_by: "",
@@ -124,7 +147,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
 </script>
 
 <template>
-  <article ref="cardRoot" class="account-card" :class="{ selected }">
+  <article ref="cardRoot" class="account-card" :class="[statusClass(account.status), { selected }]">
     <header class="account-card-header" @click="$emit('select', account.slug)">
       <h3>{{ account.name }}</h3>
       <span class="account-slug">{{ account.slug }}</span>
@@ -180,7 +203,13 @@ async function run(action: () => Promise<unknown>): Promise<void> {
     </dl>
 
     <section class="milestones" aria-label="Milestones">
-      <h4>Milestones</h4>
+      <div class="milestones-head">
+        <h4>Milestones</h4>
+        <span class="milestone-count">{{ milestoneProgress.done }}/{{ milestoneProgress.total }}</span>
+      </div>
+      <div class="milestone-progress-track" aria-hidden="true">
+        <div class="milestone-progress-fill" :style="{ width: `${milestonePct}%` }"></div>
+      </div>
       <ul>
         <li v-for="check in milestones" :key="check.label">
           <span class="milestone-badge" :class="`milestone-${check.state}`">
@@ -195,7 +224,12 @@ async function run(action: () => Promise<unknown>): Promise<void> {
     </section>
 
     <div v-if="account.internal_blocker" class="blocker-box">
-      <span>Internal blocker: {{ account.internal_blocker }}</span>
+      <span>
+        Internal blocker: {{ account.internal_blocker }}
+        <em v-if="account.internal_blocker_milestone">
+          · holds up: {{ MILESTONE_LABELS[account.internal_blocker_milestone ?? ""] ?? account.internal_blocker_milestone }}
+        </em>
+      </span>
       <button
         v-if="canAct"
         type="button"
@@ -206,7 +240,12 @@ async function run(action: () => Promise<unknown>): Promise<void> {
       </button>
     </div>
     <div v-if="account.customer_blocker" class="blocker-box">
-      <span>Customer blocker: {{ account.customer_blocker }}</span>
+      <span>
+        Customer blocker: {{ account.customer_blocker }}
+        <em v-if="account.customer_blocker_milestone">
+          · holds up: {{ MILESTONE_LABELS[account.customer_blocker_milestone ?? ""] ?? account.customer_blocker_milestone }}
+        </em>
+      </span>
       <button
         v-if="canAct"
         type="button"
@@ -284,13 +323,49 @@ async function run(action: () => Promise<unknown>): Promise<void> {
       <form
         v-if="openForm === 'internal-blocker'"
         class="account-action-form"
-        @submit.prevent="run(() => openInternalBlocker(account.slug, blockerInput))"
+        @submit.prevent="
+          run(() => openInternalBlocker(account.slug, blockerInput, blockerMilestoneInput))
+        "
       >
         <label>
           What is blocking us internally?
           <input v-model="blockerInput" type="text" required />
         </label>
+        <label>
+          Which milestone is it holding up?
+          <select v-model="blockerMilestoneInput" required>
+            <option value="" disabled>Select a milestone</option>
+            <option value="setup">Setup</option>
+            <option value="import">Import</option>
+            <option value="training">Training</option>
+            <option value="first_value">First value</option>
+          </select>
+        </label>
         <button type="submit" :disabled="working">Open blocker</button>
+      </form>
+
+      <form
+        v-if="openForm === 'customer-blocker-open'"
+        class="account-action-form"
+        @submit.prevent="
+          run(() => openCustomerBlocker(account.slug, customerBlockerInput, customerBlockerMilestoneInput))
+        "
+      >
+        <label>
+          What is blocking on the customer side?
+          <input v-model="customerBlockerInput" type="text" required />
+        </label>
+        <label>
+          Which milestone is it holding up?
+          <select v-model="customerBlockerMilestoneInput" required>
+            <option value="" disabled>Select a milestone</option>
+            <option value="setup">Setup</option>
+            <option value="import">Import</option>
+            <option value="training">Training</option>
+            <option value="first_value">First value</option>
+          </select>
+        </label>
+        <button type="submit" :disabled="working">Open customer blocker</button>
       </form>
 
       <form

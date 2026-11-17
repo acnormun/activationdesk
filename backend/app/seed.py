@@ -37,7 +37,8 @@ def ensure_demo_users(db: Session) -> None:
 def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
     """The instructions' six starting cases (Alpha-Zeta), with dates relative
     to the demo login day; facts mirror Instructions.md, including the
-    activity milestones (setup, import, training) per starting case."""
+    activity milestones (setup, import, training) per starting case. Open
+    blockers carry the milestone they hold up (import / first_value)."""
     today = date.today()
     now = datetime.now(timezone.utc)
     desired_outcome = (
@@ -56,12 +57,13 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             setup_done_at=today - timedelta(days=6),
             training_done_at=today - timedelta(days=2),
             internal_blocker="Sample-data mapping issue",
+            internal_blocker_milestone="import",
             internal_blocker_opened_at=now - timedelta(days=4),
         ),
         Account(
             workspace_id=workspace.id,
             slug="beta",
-            name="Beta LLC",
+            name="Beta Ltd",
             desired_outcome=desired_outcome,
             owner="Ana",
             start_date=today - timedelta(days=14),
@@ -69,6 +71,7 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             setup_done_at=today - timedelta(days=5),
             import_done_at=today - timedelta(days=3),
             customer_blocker="Approval policy not provided",
+            customer_blocker_milestone="first_value",
             customer_blocker_opened_at=now - timedelta(days=4),
         ),
         Account(
@@ -82,21 +85,21 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             setup_done_at=today - timedelta(days=8),
             import_done_at=today - timedelta(days=5),
             training_done_at=today - timedelta(days=2),
-            evidence_approved_by="Morgan Lee",
-            evidence_invoice_ref="INV-2041",
+            evidence_approved_by="Carla Mendes (finance owner)",
+            evidence_invoice_ref="INV-1042",
             evidence_workflow_confirmed=True,
             evidence_approved_at=today - timedelta(days=1),
-            evidence_recorded_by="Dana Reed",
+            evidence_recorded_by="Ana",
         ),
         Account(
             workspace_id=workspace.id,
             slug="delta",
             name="Delta LLC",
             desired_outcome=desired_outcome,
-            owner="Ana",
+            owner="Pedro (implementation)",
             start_date=today - timedelta(days=14),
             target_date=today + timedelta(days=7),
-            next_action="Schedule the customer training session",
+            next_action="Finish approval workflow setup",
             follow_up_date=today + timedelta(days=1),
         ),
         Account(
@@ -117,7 +120,8 @@ def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
             start_date=today - timedelta(days=14),
             target_date=today + timedelta(days=1),
             training_done_at=today - timedelta(days=4),
-            internal_blocker="Disputed invoice does not match the workflow",
+            internal_blocker="Customer disputes that the sample workflow matches their real approval process",
+            internal_blocker_milestone="first_value",
             internal_blocker_opened_at=now - timedelta(days=2),
         ),
     ]

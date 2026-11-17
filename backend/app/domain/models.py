@@ -117,12 +117,19 @@ class Milestone:
 
 @dataclass(frozen=True)
 class Blocker:
-    """Something blocking progress. ``side`` says who owns the unblock."""
+    """Something blocking progress. ``side`` says who owns the unblock.
+
+    ``milestone`` optionally names the activity milestone (setup, import,
+    training or first_value) this blocker is holding up, keeping the
+    remaining dependency explicit (Instructions.md: "make the resulting
+    state and remaining dependencies clear").
+    """
 
     id: str
     description: str
     side: BlockerSide
     owner: str | None
+    milestone: str | None
     status: BlockerStatus
     resolved_via: ResolvedVia | None
     opened_at: date | None

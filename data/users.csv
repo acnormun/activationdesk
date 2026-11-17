@@ -1,0 +1,2 @@
+id,username,password_hash,role
+1,manager,<bcrypt hash of manager123>,onboarding_manager

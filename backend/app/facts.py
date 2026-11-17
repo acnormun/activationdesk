@@ -90,6 +90,7 @@ def to_domain(account: Account) -> DomainAccount:
                 description=account.internal_blocker,
                 side=BlockerSide.INTERNAL,
                 owner=None,
+                milestone=account.internal_blocker_milestone,
                 status=BlockerStatus.OPEN,
                 resolved_via=None,
                 opened_at=(
@@ -107,6 +108,7 @@ def to_domain(account: Account) -> DomainAccount:
                 description=account.customer_blocker,
                 side=BlockerSide.CUSTOMER,
                 owner=None,
+                milestone=account.customer_blocker_milestone,
                 status=BlockerStatus.OPEN,
                 resolved_via=None,
                 opened_at=(

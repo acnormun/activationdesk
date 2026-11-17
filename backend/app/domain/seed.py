@@ -11,7 +11,7 @@ Assumptions baked into the numbers (documented so they are auditable):
   before it, "D+3" three days after it.
 - ``start_date`` is D-14 and ``owner`` is "Ana" for every account unless
   stated otherwise for that account.
-- Activity milestones follow the default template Setup / Data import /
+- Activity milestones follow the default template Setup / Import /
   Training. Milestones marked done as an assumption (the brief does not
   say when they finished) get ``completed_at = D - 7``; that date never
   affects any rule (only blocker ``opened_at`` and evidence ``approved_at``
@@ -43,7 +43,7 @@ DESIRED_OUTCOME = (
     "through the agreed workflow, with recorded evidence (first value)."
 )
 
-ACTIVITY_TEMPLATE = ("Setup", "Data import", "Training")
+ACTIVITY_TEMPLATE = ("Setup", "Import", "Training")
 
 ASSUMED_COMPLETED_AT = SAMPLE_DAY - timedelta(days=7)
 
@@ -123,7 +123,7 @@ def _build_accounts() -> tuple[Account, ...]:
         milestones=_activities(
             {
                 "Setup": MilestoneStatus.DONE,
-                "Data import": MilestoneStatus.DONE,  # assumed
+                "Import": MilestoneStatus.NOT_STARTED,  # held up by the sample-data mapping blocker
                 "Training": MilestoneStatus.DONE,
             }
         )
@@ -152,7 +152,7 @@ def _build_accounts() -> tuple[Account, ...]:
         milestones=_activities(
             {
                 "Setup": MilestoneStatus.DONE,
-                "Data import": MilestoneStatus.DONE,
+                "Import": MilestoneStatus.DONE,
                 # Training NOT_STARTED is itself an assumption of the sample.
                 "Training": MilestoneStatus.NOT_STARTED,
             }
@@ -182,7 +182,7 @@ def _build_accounts() -> tuple[Account, ...]:
         milestones=_activities(
             {
                 "Setup": MilestoneStatus.DONE,
-                "Data import": MilestoneStatus.DONE,
+                "Import": MilestoneStatus.DONE,
                 "Training": MilestoneStatus.DONE,
             }
         )
@@ -210,7 +210,7 @@ def _build_accounts() -> tuple[Account, ...]:
         blockers=(),
         next_action=NextAction(
             description="Finish approval workflow setup",
-            owner="Pedro",
+            owner="Pedro (implementation)",
             follow_up_date=SAMPLE_DAY + timedelta(days=1),
         ),
     )
@@ -219,7 +219,7 @@ def _build_accounts() -> tuple[Account, ...]:
         id="epsilon",
         name="Epsilon GmbH",
         desired_outcome=DESIRED_OUTCOME,
-        start_date=SAMPLE_DAY - timedelta(days=30),
+        start_date=SAMPLE_DAY - timedelta(days=14),
         target_date=SAMPLE_DAY - timedelta(days=5),
         owner=None,
         last_reviewed_at=None,
@@ -239,7 +239,7 @@ def _build_accounts() -> tuple[Account, ...]:
         milestones=_activities(
             {
                 "Setup": MilestoneStatus.DONE,
-                "Data import": MilestoneStatus.DONE,  # assumed
+                "Import": MilestoneStatus.DONE,  # assumed
                 "Training": MilestoneStatus.DONE,
             }
         )

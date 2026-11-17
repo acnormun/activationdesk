@@ -22,7 +22,9 @@ export interface Account {
   follow_up_date: string | null
   activity_milestones: ActivityMilestone[]
   internal_blocker: string | null
+  internal_blocker_milestone: string | null
   customer_blocker: string | null
+  customer_blocker_milestone: string | null
   evidence_approved_by: string | null
   evidence_invoice_ref: string | null
   evidence_workflow_confirmed: boolean
@@ -35,6 +37,7 @@ export interface HistoryEntry {
   actor_role: string
   action: string
   detail: string
+  simulated: boolean
   created_at: string
 }
 

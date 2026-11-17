@@ -49,6 +49,7 @@ class NoteRequest(BaseModel):
 
 class BlockerRequest(BaseModel):
     description: str | None = None
+    milestone: str | None = None
 
 
 class CustomerUpdateRequest(BaseModel):
@@ -70,6 +71,7 @@ class HistoryOut(BaseModel):
     actor_role: str
     action: str
     detail: str
+    simulated: bool = False
     created_at: datetime
 
 
@@ -97,7 +99,9 @@ class AccountOut(BaseModel):
     next_action: str | None = None
     follow_up_date: date | None = None
     internal_blocker: str | None = None
+    internal_blocker_milestone: str | None = None
     customer_blocker: str | None = None
+    customer_blocker_milestone: str | None = None
     evidence_approved_by: str | None = None
     evidence_invoice_ref: str | None = None
     evidence_workflow_confirmed: bool = False
