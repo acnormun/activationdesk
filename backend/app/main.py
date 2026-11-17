@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import router as auth_router
+from .config import parse_origins, settings
 from .database import Base, SessionLocal, engine, get_db
 from .deps import Actor, get_actor
 from .permissions import ALL_ACTIONS, ROLE_ACTIONS
@@ -27,10 +28,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Activation Desk API", version="0.1.0", lifespan=lifespan)
 
-# The Nuxt app (default dev server on port 3000) calls this API with cookies.
+# The Vue frontend (Vite dev server or the nginx container, port 3000) calls
+# this API with cookies. Override with ALLOWED_ORIGINS (comma-separated).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=parse_origins(settings.allowed_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
