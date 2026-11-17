@@ -50,6 +50,7 @@ def blocker(
     status: BlockerStatus = BlockerStatus.OPEN,
     opened_at: date | None = None,
     owner: str | None = None,
+    milestone: str | None = None,
     id: str = "b1",
 ) -> Blocker:
     return Blocker(
@@ -57,6 +58,7 @@ def blocker(
         description="Sample blocker",
         side=side,
         owner=owner,
+        milestone=milestone,
         status=status,
         resolved_via=None,
         opened_at=opened_at,
