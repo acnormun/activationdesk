@@ -54,6 +54,13 @@ class BlockerRequest(BaseModel):
 
 class CustomerUpdateRequest(BaseModel):
     customer_update: str | None = None
+    next_step: str | None = None
+    follow_up_date: date | None = None
+
+
+class CloseInternalBlockerRequest(BaseModel):
+    next_step: str | None = None
+    follow_up_date: date | None = None
 
 
 class EvidenceRequest(BaseModel):

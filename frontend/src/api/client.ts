@@ -107,13 +107,27 @@ export function openCustomerBlocker(
   return postJson(`/accounts/${slug}/customer-blocker`, { description, milestone })
 }
 
-export function closeInternalBlocker(slug: string): Promise<Account> {
-  return postJson(`/accounts/${slug}/internal-blocker/close`, {})
+export function closeInternalBlocker(
+  slug: string,
+  nextStep: string,
+  followUpDate: string,
+): Promise<Account> {
+  return postJson(`/accounts/${slug}/internal-blocker/close`, {
+    next_step: nextStep,
+    follow_up_date: followUpDate,
+  })
 }
 
-export function closeCustomerBlocker(slug: string, customerUpdate: string): Promise<Account> {
+export function closeCustomerBlocker(
+  slug: string,
+  customerUpdate: string,
+  nextStep: string,
+  followUpDate: string,
+): Promise<Account> {
   return postJson(`/accounts/${slug}/customer-blocker/close`, {
     customer_update: customerUpdate,
+    next_step: nextStep,
+    follow_up_date: followUpDate,
   })
 }
 

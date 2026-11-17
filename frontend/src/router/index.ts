@@ -2,11 +2,13 @@ import { createRouter, createWebHistory } from "vue-router"
 import { fetchSession, session } from "@/auth/session"
 import LoginView from "@/views/LoginView.vue"
 import WorkbenchView from "@/views/WorkbenchView.vue"
+import AccountDetailView from "@/views/AccountDetailView.vue"
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: "/", name: "workbench", component: WorkbenchView },
+    { path: "/accounts/:slug", name: "account", component: AccountDetailView },
     { path: "/login", name: "login", component: LoginView },
   ],
 })

@@ -52,6 +52,19 @@ export function statusClass(status: string): string {
   return `status-${status.replace(/_/g, "-")}`
 }
 
+/** Tone (colour family) for a status, matching the reference design system. */
+export const STATUS_TONES: Record<string, string> = {
+  activated: "verified",
+  blocked_internal: "internal",
+  waiting_on_customer: "customer",
+  overdue: "danger",
+  on_track: "calm",
+}
+
+export function statusTone(status: string): string {
+  return STATUS_TONES[status] ?? "neutral"
+}
+
 export const FLAG_LABELS: Record<string, string> = {
   no_owner: "No owner",
   no_next_action: "No next action",

@@ -81,13 +81,22 @@ def validate_action(action: str, account: Account, payload: dict) -> str | None:
             return "Blocker milestone is required: choose setup, import, training or first_value."
         if milestone not in BLOCKER_MILESTONES:
             return "Unknown milestone: use setup, import, training or first_value."
-    if action == CLOSE_INTERNAL_BLOCKER and not account.internal_blocker:
-        return "No internal blocker is open."
+    if action == CLOSE_INTERNAL_BLOCKER:
+        if not account.internal_blocker:
+            return "No internal blocker is open."
+        if not (payload.get("next_step") or "").strip():
+            return "A next step is required to close the blocker."
+        if payload.get("follow_up_date") is None:
+            return "A follow-up date is required for the next step."
     if action == CLOSE_CUSTOMER_BLOCKER:
         if not account.customer_blocker:
             return "No customer blocker is open."
         if not (payload.get("customer_update") or "").strip():
             return "Closing a customer blocker requires a (simulated) customer update."
+        if not (payload.get("next_step") or "").strip():
+            return "A next step is required to close the blocker."
+        if payload.get("follow_up_date") is None:
+            return "A follow-up date is required for the next step."
     if action == RECORD_VALUE_EVIDENCE and has_evidence(account):
         return "First value is already registered with evidence."
     if action == UPDATE_MILESTONE:
