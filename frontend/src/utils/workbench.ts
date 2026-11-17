@@ -74,6 +74,45 @@ export function targetLabel(target: string, today: string): string {
   return `target was ${-days} days ago`
 }
 
+/** Verification state of one account milestone. */
+export type MilestoneState = "done" | "pending" | "blocked"
+
+export interface MilestoneCheck {
+  label: string
+  state: MilestoneState
+  detail: string
+}
+
+/** Milestone checklist for one account: value evidence, next action, blockers. */
+export function buildMilestones(account: Account): MilestoneCheck[] {
+  return [
+    {
+      label: "First value evidence",
+      state: account.evidence_approved_by ? "done" : "pending",
+      detail: account.evidence_approved_by
+        ? `Invoice ${account.evidence_invoice_ref} approved by ${account.evidence_approved_by} on ${account.evidence_approved_at ?? "?"} (recorded by ${account.evidence_recorded_by ?? "?"})`
+        : "Not recorded yet",
+    },
+    {
+      label: "Next action",
+      state: account.next_action ? "done" : "pending",
+      detail: account.next_action
+        ? `${account.next_action} (follow-up ${account.follow_up_date ?? "unscheduled"})`
+        : "None recorded",
+    },
+    {
+      label: "Internal blocker",
+      state: account.internal_blocker ? "blocked" : "done",
+      detail: account.internal_blocker ?? "None",
+    },
+    {
+      label: "Customer blocker",
+      state: account.customer_blocker ? "blocked" : "done",
+      detail: account.customer_blocker ?? "None",
+    },
+  ]
+}
+
 /** Filter accounts by status and free text across slug, name and owner. */
 export function filterAccounts(
   accounts: Account[],

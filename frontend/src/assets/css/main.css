@@ -310,6 +310,7 @@ body {
 }
 
 .account-card {
+  position: relative;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: #fff;
@@ -430,15 +431,107 @@ body {
   margin-top: 12px;
 }
 
-.account-actions h4 {
-  margin: 0 0 8px;
+.milestones {
+  margin: 10px 0;
   font-size: 13px;
 }
 
-.action-row {
+.milestones h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.milestones ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.milestones li {
   display: flex;
-  flex-wrap: wrap;
+  align-items: baseline;
   gap: 8px;
+}
+
+.milestone-badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.milestone-done {
+  background: #15803d;
+}
+
+.milestone-pending {
+  background: var(--muted);
+}
+
+.milestone-blocked {
+  background: var(--danger);
+}
+
+.milestone-text {
+  display: grid;
+}
+
+.milestone-label {
+  font-weight: 600;
+}
+
+.milestone-detail {
+  color: var(--muted);
+}
+
+.card-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.card-menu-trigger {
+  border: none;
+  background: none;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.card-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  display: grid;
+  padding: 4px;
+}
+
+.card-menu-item {
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.card-menu-item:hover {
+  background: var(--bg);
 }
 
 .account-action-form {
@@ -471,7 +564,6 @@ body {
 }
 
 .account-action-form button,
-.account-card button.action,
 .blocker-box button,
 .account-detail-header button {
   border: 1px solid var(--border);

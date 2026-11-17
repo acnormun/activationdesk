@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, nextTick, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { logout, session } from "@/auth/session"
 import {
@@ -59,6 +59,20 @@ async function loadDetail(slug: string): Promise<void> {
   }
 }
 
+/** Center the account card of a plan entry: clear filters if it is hidden, then scroll to it. */
+async function focusPlanAccount(slug: string): Promise<void> {
+  await loadDetail(slug)
+  if (!filtered.value.some((account) => account.slug === slug)) {
+    statusFilter.value = ""
+    query.value = ""
+  }
+  await nextTick()
+  document.getElementById(`account-card-${slug}`)?.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  })
+}
+
 async function refresh(): Promise<void> {
   await loadBoard()
   if (selectedSlug.value) await loadDetail(selectedSlug.value)
@@ -87,7 +101,7 @@ onMounted(loadBoard)
 
     <section class="workbench-body">
       <div class="workbench-columns">
-        <WeekPlanPanel :plan="plan" @select="loadDetail" />
+        <WeekPlanPanel :plan="plan" @select="focusPlanAccount" />
 
         <section class="accounts">
           <header class="accounts-header">
@@ -111,7 +125,7 @@ onMounted(loadBoard)
           <p v-if="loading" class="panel-status">Loading accounts…</p>
           <p v-else-if="filtered.length === 0" class="panel-status">{{ emptyMessage }}</p>
           <ul v-else class="account-list">
-            <li v-for="account in filtered" :key="account.slug">
+            <li :id="`account-card-${account.slug}`" v-for="account in filtered" :key="account.slug">
               <AccountCard
                 :account="account"
                 :today="today"

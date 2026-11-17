@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import {
   ApiError,
   assignOwner,
@@ -12,7 +12,13 @@ import {
   setTargetDate,
 } from "@/api/client"
 import type { Account } from "@/types/workbench"
-import { flagLabel, statusClass, statusLabel, targetLabel } from "@/utils/workbench"
+import {
+  buildMilestones,
+  flagLabel,
+  statusClass,
+  statusLabel,
+  targetLabel,
+} from "@/utils/workbench"
 
 const props = defineProps<{
   account: Account
@@ -28,6 +34,26 @@ const emit = defineEmits<{
 const openForm = ref("")
 const errorMessage = ref("")
 const working = ref(false)
+const menuOpen = ref(false)
+const cardRoot = ref<HTMLElement | null>(null)
+
+const milestones = computed(() => buildMilestones(props.account))
+
+const menuActions = computed(() => {
+  const actions = [
+    { name: "owner", label: "Assign owner" },
+    { name: "target-date", label: "Set target date" },
+    { name: "next-action", label: "Set next action" },
+    { name: "progress", label: "Record progress" },
+  ]
+  if (!props.account.internal_blocker) {
+    actions.push({ name: "internal-blocker", label: "Open internal blocker" })
+  }
+  if (!props.account.evidence_approved_by) {
+    actions.push({ name: "value-evidence", label: "Record value evidence" })
+  }
+  return actions
+})
 
 const ownerInput = ref(props.account.owner ?? "")
 const targetDateInput = ref(props.account.target_date)
@@ -49,8 +75,23 @@ const canAct = computed(() => props.account.status !== "activated")
 
 function toggleForm(name: string): void {
   errorMessage.value = ""
+  menuOpen.value = false
   openForm.value = openForm.value === name ? "" : name
 }
+
+function toggleMenu(): void {
+  menuOpen.value = !menuOpen.value
+}
+
+/** Close the actions menu when clicking anywhere outside the card. */
+function onDocumentClick(event: MouseEvent): void {
+  if (menuOpen.value && cardRoot.value && !cardRoot.value.contains(event.target as Node)) {
+    menuOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener("click", onDocumentClick))
+onBeforeUnmount(() => document.removeEventListener("click", onDocumentClick))
 
 async function run(action: () => Promise<unknown>): Promise<void> {
   errorMessage.value = ""
@@ -69,7 +110,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
 </script>
 
 <template>
-  <article class="account-card" :class="{ selected }">
+  <article ref="cardRoot" class="account-card" :class="{ selected }">
     <header class="account-card-header" @click="$emit('select', account.slug)">
       <h3>{{ account.name }}</h3>
       <span class="account-slug">{{ account.slug }}</span>
@@ -80,6 +121,28 @@ async function run(action: () => Promise<unknown>): Promise<void> {
       <span v-for="flag in account.flags" :key="flag" class="flag-badge">
         {{ flagLabel(flag) }}
       </span>
+      <div v-if="canAct" class="card-menu" @click.stop>
+        <button
+          type="button"
+          class="card-menu-trigger"
+          aria-label="Open actions menu"
+          :aria-expanded="menuOpen"
+          @click.stop="toggleMenu"
+        >
+          ⋮
+        </button>
+        <div v-if="menuOpen" class="card-menu-dropdown">
+          <button
+            v-for="item in menuActions"
+            :key="item.name"
+            type="button"
+            class="card-menu-item"
+            @click="toggleForm(item.name)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+      </div>
     </header>
 
     <dl class="account-facts">
@@ -101,6 +164,21 @@ async function run(action: () => Promise<unknown>): Promise<void> {
         </dd>
       </div>
     </dl>
+
+    <section class="milestones" aria-label="Milestones">
+      <h4>Milestones</h4>
+      <ul>
+        <li v-for="check in milestones" :key="check.label">
+          <span class="milestone-badge" :class="`milestone-${check.state}`">
+            {{ check.state }}
+          </span>
+          <span class="milestone-text">
+            <span class="milestone-label">{{ check.label }}</span>
+            <span class="milestone-detail">{{ check.detail }}</span>
+          </span>
+        </li>
+      </ul>
+    </section>
 
     <div v-if="account.evidence_approved_by" class="evidence-box">
       First value recorded: invoice {{ account.evidence_invoice_ref }} approved by
@@ -144,54 +222,6 @@ async function run(action: () => Promise<unknown>): Promise<void> {
     </form>
 
     <section v-if="canAct" class="account-actions">
-      <h4>Actions</h4>
-      <div class="action-row">
-        <button
-          type="button"
-          class="action"
-          @click="toggleForm('owner')"
-        >
-          Assign owner
-        </button>
-        <button
-          type="button"
-          class="action"
-          @click="toggleForm('target-date')"
-        >
-          Set target date
-        </button>
-        <button
-          type="button"
-          class="action"
-          @click="toggleForm('next-action')"
-        >
-          Set next action
-        </button>
-        <button
-          type="button"
-          class="action"
-          @click="toggleForm('progress')"
-        >
-          Record progress
-        </button>
-        <button
-          v-if="!account.internal_blocker"
-          type="button"
-          class="action"
-          @click="toggleForm('internal-blocker')"
-        >
-          Open internal blocker
-        </button>
-        <button
-          v-if="!account.evidence_approved_by"
-          type="button"
-          class="action"
-          @click="toggleForm('value-evidence')"
-        >
-          Record value evidence
-        </button>
-      </div>
-
       <form
         v-if="openForm === 'owner'"
         class="account-action-form"

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   LANE_ORDER,
+  buildMilestones,
   emptyFilterMessage,
   filterAccounts,
   flagLabel,
@@ -122,5 +123,45 @@ describe("emptyFilterMessage", () => {
     expect(emptyFilterMessage("activated", "nebula")).toBe(
       'No activated accounts match "nebula".',
     )
+  })
+})
+
+describe("buildMilestones", () => {
+  it("marks all milestones pending on a fresh account", () => {
+    const checks = buildMilestones(account())
+    expect(checks.map((c) => [c.label, c.state])).toEqual([
+      ["First value evidence", "pending"],
+      ["Next action", "pending"],
+      ["Internal blocker", "done"],
+      ["Customer blocker", "done"],
+    ])
+  })
+
+  it("marks recorded evidence and next action as done with details", () => {
+    const checks = buildMilestones(
+      account({
+        next_action: "Send invoice sample",
+        follow_up_date: "2026-11-20",
+        evidence_approved_by: "Dana",
+        evidence_invoice_ref: "INV-42",
+        evidence_approved_at: "2026-11-15",
+        evidence_recorded_by: "manager",
+      }),
+    )
+    const [evidence, nextAction] = checks
+    expect(evidence.state).toBe("done")
+    expect(evidence.detail).toContain("INV-42")
+    expect(evidence.detail).toContain("Dana")
+    expect(nextAction.state).toBe("done")
+    expect(nextAction.detail).toContain("Send invoice sample")
+    expect(nextAction.detail).toContain("2026-11-20")
+  })
+
+  it("marks open blockers as blocked", () => {
+    const checks = buildMilestones(
+      account({ internal_blocker: "Waiting on security review", customer_blocker: "Needs legal" }),
+    )
+    expect(checks[2]).toMatchObject({ label: "Internal blocker", state: "blocked" })
+    expect(checks[3]).toMatchObject({ label: "Customer blocker", state: "blocked" })
   })
 })
