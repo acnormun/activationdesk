@@ -15,19 +15,20 @@ class WeekPlanTests(ApiTestCase):
         data = response.json()
         self.assertEqual(data["slots"], 2)
         lanes = data["lanes"]
-        self.assertEqual(slugs(lanes["intervention"]), ["delta"])
+        self.assertEqual(slugs(lanes["intervention"]), ["alpha", "zeta"])
         self.assertEqual(slugs(lanes["nudge"]), ["beta"])
-        self.assertEqual(slugs(lanes["triage"]), ["gamma"])
-        self.assertIn("alpha", slugs(lanes["monitor"]))
-        self.assertIn("epsilon", slugs(lanes["no_intervention"]))
-        self.assertEqual(data["empty_slots"], 1)
-        self.assertTrue(data["message"])
+        self.assertEqual(slugs(lanes["triage"]), ["epsilon"])
+        self.assertEqual(slugs(lanes["monitor"]), ["delta"])
+        self.assertEqual(slugs(lanes["no_intervention"]), ["gamma"])
+        self.assertEqual(lanes["waiting_for_capacity"], [])
+        self.assertEqual(data["empty_slots"], 0)
+        self.assertEqual(data["message"], "")
 
     def test_intervention_entry_has_explainable_score(self) -> None:
         self.login("manager", "manager123")
         data = self.client.get("/plan/week").json()
         entry = data["lanes"]["intervention"][0]
-        self.assertEqual(entry["account_slug"], "delta")
+        self.assertEqual(entry["account_slug"], "alpha")
         self.assertTrue(entry["reason"])
         total = 0
         for label in ("urgency", "stagnation", "closeness", "followup"):
@@ -68,12 +69,15 @@ class DomainStatusReadTests(ApiTestCase):
     def test_reads_derive_status_and_flags_from_facts(self) -> None:
         self.login("manager", "manager123")
         accounts = {a["slug"]: a for a in self.client.get("/accounts").json()}
-        self.assertEqual(accounts["gamma"]["status"], "overdue")
-        self.assertIn("no_owner", accounts["gamma"]["flags"])
-        self.assertIn("no_next_action", accounts["gamma"]["flags"])
-        self.assertIn("past_target", accounts["gamma"]["flags"])
-        self.assertEqual(accounts["epsilon"]["status"], "activated")
-        self.assertEqual(accounts["epsilon"]["flags"], [])
+        self.assertEqual(accounts["alpha"]["status"], "blocked_internal")
+        self.assertEqual(accounts["beta"]["status"], "waiting_on_customer")
+        self.assertEqual(accounts["gamma"]["status"], "activated")
+        self.assertEqual(accounts["delta"]["status"], "on_track")
+        self.assertEqual(accounts["epsilon"]["status"], "overdue")
+        self.assertEqual(
+            accounts["epsilon"]["flags"], ["no_owner", "no_next_action", "past_target"]
+        )
+        self.assertEqual(accounts["zeta"]["status"], "blocked_internal")
 
     def test_detail_exposes_desired_outcome(self) -> None:
         self.login("manager", "manager123")

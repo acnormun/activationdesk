@@ -91,3 +91,8 @@ class AccountOut(BaseModel):
     follow_up_date: date | None = None
     internal_blocker: str | None = None
     customer_blocker: str | None = None
+    evidence_approved_by: str | None = None
+    evidence_invoice_ref: str | None = None
+    evidence_workflow_confirmed: bool = False
+    evidence_approved_at: date | None = None
+    evidence_recorded_by: str | None = None

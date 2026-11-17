@@ -30,11 +30,15 @@ class AuthTests(ApiTestCase):
     def test_login_seeds_mock_accounts_for_every_lane(self) -> None:
         self.login("cshead", "cshead123")
         accounts = {a["slug"]: a["status"] for a in self.client.get("/accounts").json()}
-        self.assertEqual(set(accounts), {"alpha", "beta", "gamma", "delta", "epsilon"})
+        self.assertEqual(
+            set(accounts), {"alpha", "beta", "gamma", "delta", "epsilon", "zeta"}
+        )
+        self.assertEqual(accounts["alpha"], "blocked_internal")
         self.assertEqual(accounts["beta"], "waiting_on_customer")
-        self.assertEqual(accounts["gamma"], "overdue")
-        self.assertEqual(accounts["delta"], "blocked_internal")
-        self.assertEqual(accounts["epsilon"], "activated")
+        self.assertEqual(accounts["gamma"], "activated")
+        self.assertEqual(accounts["delta"], "on_track")
+        self.assertEqual(accounts["epsilon"], "overdue")
+        self.assertEqual(accounts["zeta"], "blocked_internal")
 
     def test_finance_sees_only_own_account(self) -> None:
         self.login("finance", "finance123")

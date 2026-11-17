@@ -37,64 +37,82 @@ def ensure_demo_users(db: Session) -> None:
 
 
 def seed_workspace_accounts(db: Session, workspace: DemoWorkspace) -> None:
-    """Mock accounts for a fresh workspace, covering every Pipeline 1 lane."""
+    """The instructions' six starting cases (Alpha-Zeta), with dates relative
+    to the demo login day; facts mirror app/domain/seed.py (the demo database
+    does not track activity milestones, only the VALUE milestone evidence)."""
     today = date.today()
     now = datetime.now(timezone.utc)
+    desired_outcome = (
+        "The customer's finance owner approves a representative invoice "
+        "through the agreed workflow, with recorded evidence (first value)."
+    )
     accounts = [
         Account(
             workspace_id=workspace.id,
             slug="alpha",
             name="Alpha Corp",
-            desired_outcome="Reporting dashboard adopted by the client team",
-            owner="Dana Reed",
-            start_date=today - timedelta(days=15),
-            target_date=today + timedelta(days=15),
-            next_action="Schedule the kickoff call",
-            follow_up_date=today + timedelta(days=2),
+            desired_outcome=desired_outcome,
+            owner="Ana",
+            start_date=today - timedelta(days=14),
+            target_date=today + timedelta(days=3),
+            internal_blocker="Sample-data mapping issue",
+            internal_blocker_opened_at=now - timedelta(days=4),
         ),
         Account(
             workspace_id=workspace.id,
             slug="beta",
             name="Beta LLC",
-            desired_outcome="Daily data feed live for invoice tracking",
-            owner="Dana Reed",
-            start_date=today - timedelta(days=10),
-            target_date=today + timedelta(days=5),
-            customer_blocker="Waiting for the client data feed",
-            customer_blocker_opened_at=now - timedelta(days=3),
+            desired_outcome=desired_outcome,
+            owner="Ana",
+            start_date=today - timedelta(days=14),
+            target_date=today + timedelta(days=2),
+            customer_blocker="Approval policy not provided",
+            customer_blocker_opened_at=now - timedelta(days=4),
         ),
         Account(
             workspace_id=workspace.id,
             slug="gamma",
-            name="Gamma Partners",
-            desired_outcome="Invoice workflow migrated to the new portal",
-            start_date=today - timedelta(days=30),
-            target_date=today - timedelta(days=2),
+            name="Gamma SA",
+            desired_outcome=desired_outcome,
+            owner="Ana",
+            start_date=today - timedelta(days=14),
+            target_date=today,
+            evidence_approved_by="Morgan Lee",
+            evidence_invoice_ref="INV-2041",
+            evidence_workflow_confirmed=True,
+            evidence_approved_at=today - timedelta(days=1),
+            evidence_recorded_by="Dana Reed",
         ),
         Account(
             workspace_id=workspace.id,
             slug="delta",
-            name="Delta Systems",
-            desired_outcome="Bulk invoice import enabled",
-            owner="Evan Ortiz",
-            start_date=today - timedelta(days=12),
-            target_date=today + timedelta(days=18),
-            internal_blocker="Blocked by the data migration",
-            internal_blocker_opened_at=now - timedelta(days=7),
+            name="Delta LLC",
+            desired_outcome=desired_outcome,
+            owner="Ana",
+            start_date=today - timedelta(days=14),
+            target_date=today + timedelta(days=7),
+            next_action="Schedule the customer training session",
+            follow_up_date=today + timedelta(days=1),
         ),
         Account(
             workspace_id=workspace.id,
             slug="epsilon",
-            name="Epsilon Group",
-            desired_outcome="First-value invoice processed end to end",
-            owner="Dana Reed",
-            start_date=today - timedelta(days=25),
-            target_date=today + timedelta(days=5),
-            evidence_approved_by="Morgan Lee",
-            evidence_invoice_ref="INV-2041",
-            evidence_workflow_confirmed=True,
-            evidence_approved_at=today,
-            evidence_recorded_by="Dana Reed",
+            name="Epsilon GmbH",
+            desired_outcome=desired_outcome,
+            owner=None,
+            start_date=today - timedelta(days=14),
+            target_date=today - timedelta(days=5),
+        ),
+        Account(
+            workspace_id=workspace.id,
+            slug="zeta",
+            name="Zeta Inc",
+            desired_outcome=desired_outcome,
+            owner="Ana",
+            start_date=today - timedelta(days=14),
+            target_date=today + timedelta(days=1),
+            internal_blocker="Disputed invoice does not match the workflow",
+            internal_blocker_opened_at=now - timedelta(days=2),
         ),
     ]
     for account in accounts:

@@ -140,8 +140,399 @@ body {
   cursor: pointer;
 }
 
+.workbench {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px 48px;
+}
+
 .workbench-body {
   padding: 24px 0;
+}
+
+.workbench-columns {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel-status {
   color: var(--muted);
   font-size: 14px;
+}
+
+.board-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  color: var(--danger);
+  background: #fef2f2;
+  font-size: 13px;
+}
+
+/* Week plan */
+.week-plan {
+  display: grid;
+  gap: 12px;
+}
+
+.week-plan-header h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.week-plan-slots {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.week-plan-message {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.lane {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px;
+}
+
+.lane h3 {
+  margin: 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lane-description {
+  margin: 2px 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.lane-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.lane-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.plan-entry {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.plan-entry-name {
+  font-weight: 600;
+}
+
+.plan-entry-reason {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #eef2f7;
+  color: var(--muted);
+  justify-self: start;
+}
+
+.badge.nudge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge.score {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+/* Accounts */
+.accounts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.accounts-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-bar select,
+.filter-bar input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.account-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 16px;
+}
+
+.account-card.selected {
+  border-color: var(--accent);
+}
+
+.account-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.account-card-header h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.account-slug {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--muted);
+}
+
+.status-badge.status-activated {
+  background: #15803d;
+}
+
+.status-badge.status-on-track {
+  background: var(--accent);
+}
+
+.status-badge.status-blocked-internal {
+  background: #b45309;
+}
+
+.status-badge.status-waiting-on-customer {
+  background: #7c3aed;
+}
+
+.status-badge.status-overdue {
+  background: var(--danger);
+}
+
+.flag-badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #fee2e2;
+  color: var(--danger);
+}
+
+.account-target {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.account-facts {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.account-facts dt {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.account-facts dd {
+  margin: 0;
+}
+
+.evidence-box {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  border: 1px solid #15803d;
+  font-size: 13px;
+}
+
+.evidence-box.pending {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.blocker-box {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff7ed;
+  border: 1px solid #ea580c;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.account-actions {
+  margin-top: 12px;
+}
+
+.account-actions h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account-action-form {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0 4px;
+  margin-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.account-action-form label {
+  font-size: 12px;
+  color: var(--muted);
+  display: grid;
+  gap: 2px;
+}
+
+.account-action-form input[type="text"],
+.account-action-form input[type="date"] {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.account-action-form label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account-action-form button,
+.account-card button.action,
+.blocker-box button,
+.account-detail-header button {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.account-action-form button:disabled,
+.blocker-box button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.action-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+
+.activated-note {
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Detail and history */
+.account-detail {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.account-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-detail-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.history-list {
+  margin: 12px 0 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.history-date {
+  color: var(--muted);
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.history-action {
+  font-weight: 600;
+  margin-right: 8px;
 }

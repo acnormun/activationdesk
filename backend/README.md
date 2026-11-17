@@ -35,8 +35,8 @@ uvicorn app.main:app --reload   # no .env: runs on sqlite:///./activationdesk.de
 
 - Without a `.env` file the API runs on a local mock SQLite database, created
   and seeded automatically at startup (git-ignored).
-- Every login creates an isolated demo workspace with 5 mock accounts covering
-  every Pipeline 1 lane.
+- Every login creates an isolated demo workspace with the six starting cases
+  from the instructions (Alpha-Zeta), covering every Pipeline 1 lane.
 - To switch to PostgreSQL later, uncomment the PostgreSQL URL in `.env` and
   start the compose stack.
 

@@ -31,6 +31,26 @@ npm test # vitest, unit tests for the pure helpers
 npm run build # type-checks with vue-tsc and builds to dist/
 ```
 
+## Workbench
+
+The workbench at `/` is the internal panel:
+
+- **Week plan** — `GET /plan/week` rendered as the six priority lanes, with
+  the explainable score per intervention entry, nudge levels and slot usage.
+- **Accounts** — `GET /accounts` cards with status, flags, target date,
+  owner, next action, open blockers and first-value evidence. Filter by
+  status and free text, with explicit empty states.
+- **Actions** — the write actions of the Roles and access table, gated in
+  the UI by `GET /permissions`: assign owner, set target date, set next
+  action, record progress, open/close internal blocker, close customer
+  blocker (finance role) and record value evidence. Activated accounts
+  accept no further changes (mirrors the backend rule).
+- **History** — selecting an account loads `GET /accounts/{slug}` and shows
+  the append-only history.
+
+Pure helpers (lane metadata, labels, filters, permission checks) live in
+`src/utils/workbench.ts` and are covered by `test/workbench.spec.ts`.
+
 ## Demo accounts
 
 `manager/manager123` (full access) · `finance/finance123` (Beta scope only) ·
