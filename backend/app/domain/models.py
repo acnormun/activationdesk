@@ -50,11 +50,9 @@ class ResolvedVia(enum.Enum):
 
 
 class Role(enum.Enum):
-    """Roles from the Roles and access matrix."""
+    """The single demo user: the onboarding manager does everything."""
 
     ONBOARDING_MANAGER = "onboarding_manager"
-    CUSTOMER_FINANCE_LEAD = "customer_finance_lead"
-    HEAD_OF_CS = "head_of_cs"
 
 
 class Status(enum.Enum):

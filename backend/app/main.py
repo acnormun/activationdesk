@@ -8,8 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from .auth import router as auth_router
 from .config import parse_origins, settings
 from .database import Base, SessionLocal, engine, get_db
-from .deps import Actor, get_actor
-from .permissions import ALL_ACTIONS, ROLE_ACTIONS
 from .routers import accounts, plan
 from .seed import ensure_demo_users
 
@@ -46,17 +44,3 @@ app.include_router(plan.router)
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
-
-
-@app.get("/permissions")
-def permissions_matrix(actor: Actor = Depends(get_actor)) -> dict:
-    """Roles and access: the 10 actions x 3 roles matrix."""
-    return {
-        "actions": [
-            {
-                "action": action,
-                **{role: action in ROLE_ACTIONS[role] for role in ROLE_ACTIONS},
-            }
-            for action in ALL_ACTIONS
-        ]
-    }

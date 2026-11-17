@@ -72,10 +72,7 @@ async function onSubmit(): Promise<void> {
           {{ submitting ? "Signing in…" : "Sign in" }}
         </button>
       </form>
-      <p class="login-demo">
-        Demo accounts: manager/manager123 · finance/finance123 ·
-        cshead/cshead123
-      </p>
+      <p class="login-demo">Demo account: manager / manager123</p>
     </section>
   </main>
 </template>

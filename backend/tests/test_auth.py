@@ -22,13 +22,12 @@ class AuthTests(ApiTestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_me_with_session_returns_user_and_workspace(self) -> None:
-        self.login("finance", "finance123")
+        self.login("manager", "manager123")
         data = self.client.get("/auth/me").json()
-        self.assertEqual(data["user"]["username"], "finance")
-        self.assertEqual(data["user"]["account_ref"], "beta")
+        self.assertEqual(data["user"]["username"], "manager")
 
     def test_login_seeds_mock_accounts_for_every_lane(self) -> None:
-        self.login("cshead", "cshead123")
+        self.login("manager", "manager123")
         accounts = {a["slug"]: a["status"] for a in self.client.get("/accounts").json()}
         self.assertEqual(
             set(accounts), {"alpha", "beta", "gamma", "delta", "epsilon", "zeta"}
@@ -39,8 +38,3 @@ class AuthTests(ApiTestCase):
         self.assertEqual(accounts["delta"], "on_track")
         self.assertEqual(accounts["epsilon"], "overdue")
         self.assertEqual(accounts["zeta"], "blocked_internal")
-
-    def test_finance_sees_only_own_account(self) -> None:
-        self.login("finance", "finance123")
-        slugs = [a["slug"] for a in self.client.get("/accounts").json()]
-        self.assertEqual(slugs, ["beta"])

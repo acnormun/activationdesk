@@ -1,7 +1,7 @@
-/** Pure helpers for the workbench: lane metadata, labels, filters and
- * permission checks. Framework-free so vitest can test them directly. */
+/** Pure helpers for the workbench: lane metadata, labels and filters.
+ * Framework-free so vitest can test them directly. */
 
-import type { Account, PermissionRow } from "@/types/workbench"
+import type { Account } from "@/types/workbench"
 
 /** Display order of the week-plan lanes. */
 export const LANE_ORDER = [
@@ -98,11 +98,4 @@ export function emptyFilterMessage(status: string, query: string): string {
   if (status) return `No ${statusLabel(status).toLowerCase()} accounts right now.`
   if (text) return `No accounts match "${text}".`
   return "No accounts in this workspace yet."
-}
-
-/** Whether the role may perform the action, from the /permissions matrix. */
-export function roleCan(rows: PermissionRow[], action: string, role: string): boolean {
-  const row = rows.find((entry) => entry.action === action)
-  if (!row) return false
-  return Boolean((row as unknown as Record<string, boolean>)[role])
 }

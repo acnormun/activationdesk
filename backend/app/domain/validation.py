@@ -112,10 +112,9 @@ def validate_next_action(action: NextAction | None, today: date) -> list[str]:
 def validate_blocker_resolution(
     blocker: Blocker, via: ResolvedVia | None, actor_role: Role | None
 ) -> list[str]:
-    """Only the blocker's owner side can resolve it, and only through the
-    matching route: customer blockers need a customer update confirmed by
-    the customer finance lead; internal blockers need an internal fix by
-    the onboarding manager."""
+    """Only the onboarding manager resolves blockers, and only through the
+    matching route: customer blockers need the recorded (simulated)
+    customer update; internal blockers need an internal fix."""
     if blocker.status is not BlockerStatus.OPEN:
         return [
             f"Blocker '{blocker.description}' is not open: only an open "
@@ -126,24 +125,14 @@ def validate_blocker_resolution(
         if via is not ResolvedVia.CUSTOMER_UPDATE_SIMULATED:
             errors.append(
                 "Only a customer update can resolve a customer-owned "
-                "blocker: ask the customer finance lead to confirm the "
-                "update instead of fixing it internally."
-            )
-        if actor_role is not Role.CUSTOMER_FINANCE_LEAD:
-            errors.append(
-                "Only the customer finance lead can resolve a "
-                "customer-owned blocker: route the resolution to them."
+                "blocker: record the (simulated) customer update instead "
+                "of fixing it internally."
             )
     else:  # BlockerSide.INTERNAL
         if via is not ResolvedVia.INTERNAL_FIX:
             errors.append(
                 "An internal blocker is resolved by an internal fix, not "
                 "by a customer update."
-            )
-        if actor_role is not Role.ONBOARDING_MANAGER:
-            errors.append(
-                "Only the onboarding manager can resolve an internal "
-                "blocker: route the resolution to them."
             )
     return errors
 

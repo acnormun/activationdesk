@@ -16,7 +16,6 @@ class UserOut(BaseModel):
     id: int
     username: str
     role: str
-    account_ref: str | None = None
 
 
 class WorkspaceOut(BaseModel):

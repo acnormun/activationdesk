@@ -5,16 +5,19 @@ change is allowed.
 """
 
 from .models import Account
-from .permissions import (
-    ASSIGN_OWNER,
-    CLOSE_CUSTOMER_BLOCKER,
-    CLOSE_INTERNAL_BLOCKER,
-    OPEN_INTERNAL_BLOCKER,
-    RECORD_PROGRESS,
-    RECORD_VALUE_EVIDENCE,
-    SET_NEXT_ACTION,
-    SET_TARGET_DATE,
-)
+
+# Action names shared by the routers and the business rules. The demo has a
+# single user (the onboarding manager): there is no role matrix anymore.
+VIEW_DASHBOARD = "view_dashboard"
+VIEW_ACCOUNT = "view_account"
+ASSIGN_OWNER = "assign_owner"
+SET_TARGET_DATE = "set_target_date"
+SET_NEXT_ACTION = "set_next_action"
+RECORD_PROGRESS = "record_progress"
+OPEN_INTERNAL_BLOCKER = "open_internal_blocker"
+CLOSE_INTERNAL_BLOCKER = "close_internal_blocker"
+CLOSE_CUSTOMER_BLOCKER = "close_customer_blocker"
+RECORD_VALUE_EVIDENCE = "record_value_evidence"
 from .domain.models import Status
 from .facts import has_evidence
 

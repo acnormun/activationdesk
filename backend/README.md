@@ -43,34 +43,18 @@ uvicorn app.main:app --reload   # no .env: runs on sqlite:///./activationdesk.de
 ## Request checks (every request, in this order)
 
 1. Valid session -> otherwise **401**
-2. Role with permission -> otherwise **403**, saying which role is allowed
-3. Account inside the user scope -> otherwise **404**
-4. Business rules -> otherwise **422**, with the reason
+2. Account exists in the workspace -> otherwise **404**
+3. Business rules -> otherwise **422**, with the reason
 
-## Roles and access (10 actions x 3 roles)
+## Single demo user
 
-| Action | Onboarding manager | Client finance | CS head |
-|---|---|---|---|
-| view_dashboard | yes | yes (own account) | yes |
-| view_account | yes | yes (own account) | yes |
-| assign_owner | yes | no | no |
-| set_target_date | yes | no | no |
-| set_next_action | yes | no | no |
-| record_progress | yes | no | no |
-| open_internal_blocker | yes | no | no |
-| close_internal_blocker | yes | no | no |
-| close_customer_blocker | no | yes (own account) | no |
-| record_value_evidence | yes | no | no |
+| Username | Password | Role |
+|---|---|---|
+| manager | manager123 | onboarding_manager |
 
-The UI colors for this table live in the Nuxt app; the API serves the matrix at `GET /permissions`.
-
-## Demo-only access
-
-| Username | Password | Role | Scope |
-|---|---|---|---|
-| manager | manager123 | onboarding_manager | all accounts in the workspace |
-| finance | finance123 | client_finance | Beta account only |
-| cshead | cshead123 | cs_head | read-only |
+The onboarding manager is the only user of the app: sees every account,
+can perform every write action and closes customer blockers by recording
+the (simulated) customer update.
 
 - Every login creates an isolated demo workspace seeded with mock accounts.
 - Not included (demo-only): sign-up, password recovery, user management and configurable permissions.

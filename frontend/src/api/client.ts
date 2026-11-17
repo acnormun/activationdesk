@@ -3,7 +3,6 @@
 import type {
   Account,
   AccountDetail,
-  PermissionsMatrix,
   WeekPlan,
 } from "@/types/workbench"
 
@@ -67,10 +66,6 @@ export function fetchAccountDetail(slug: string): Promise<AccountDetail> {
 
 export function fetchWeekPlan(slots = 2): Promise<WeekPlan> {
   return getJson(`/plan/week?slots=${slots}`)
-}
-
-export function fetchPermissions(): Promise<PermissionsMatrix> {
-  return getJson("/permissions")
 }
 
 export function assignOwner(slug: string, owner: string): Promise<Account> {

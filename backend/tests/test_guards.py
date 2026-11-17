@@ -1,4 +1,4 @@
-"""Tests for the request check order: 401 -> 403 -> 404 -> 422."""
+"""Tests for the request check order: 401 -> 404 -> 422."""
 
 from .base import ApiTestCase
 
@@ -8,16 +8,10 @@ class GuardOrderTests(ApiTestCase):
         response = self.client.post("/accounts/alpha/owner", json={"owner": "X"})
         self.assertEqual(response.status_code, 401)
 
-    def test_role_without_permission_is_403_with_allowed_roles(self) -> None:
-        self.login("cshead", "cshead123")
-        response = self.client.post("/accounts/alpha/owner", json={"owner": "Dana Reed"})
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.json()["detail"]["allowed_roles"], ["onboarding_manager"])
-
-    def test_account_outside_scope_is_404_even_with_permission(self) -> None:
-        self.login("finance", "finance123")
+    def test_unknown_account_is_404(self) -> None:
+        self.login("manager", "manager123")
         response = self.client.post(
-            "/accounts/gamma/customer-blocker/close",
+            "/accounts/ghost/customer-blocker/close",
             json={"customer_update": "Client confirmed."},
         )
         self.assertEqual(response.status_code, 404)

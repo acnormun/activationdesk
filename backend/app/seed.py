@@ -1,4 +1,4 @@
-"""Demo seed: 3 example users (created once) and mock accounts per workspace.
+"""Demo seed: one example user (created once) and mock accounts per workspace.
 
 Demo-only access: no sign-up, no password recovery, no user management and
 no configurable permissions.
@@ -14,8 +14,6 @@ from .security import hash_password
 
 DEMO_USERS = [
     {"username": "manager", "password": "manager123", "role": Role.ONBOARDING_MANAGER, "account_ref": None},
-    {"username": "finance", "password": "finance123", "role": Role.CLIENT_FINANCE, "account_ref": "beta"},
-    {"username": "cshead", "password": "cshead123", "role": Role.CS_HEAD, "account_ref": None},
 ]
 
 

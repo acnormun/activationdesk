@@ -1,8 +1,8 @@
-"""Account routes: reads plus the 8 write actions of the Roles and access table.
+"""Account routes: reads plus the 8 write actions.
 
 Every write runs change + history + Pipeline 1 recalculation in a single
 transaction (apply_change). Dependencies keep the check order:
-session (401) -> permission (403) -> scope (404) -> business rule (422).
+session (401) -> account exists (404) -> business rule (422).
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,7 +12,7 @@ from ..business import validate_action
 from ..database import get_db
 from ..deps import Actor, get_actor, get_scoped_account
 from ..models import Account, HistoryEntry, utcnow
-from ..permissions import (
+from ..business import (
     ASSIGN_OWNER,
     CLOSE_CUSTOMER_BLOCKER,
     CLOSE_INTERNAL_BLOCKER,
@@ -21,9 +21,6 @@ from ..permissions import (
     RECORD_VALUE_EVIDENCE,
     SET_NEXT_ACTION,
     SET_TARGET_DATE,
-    VIEW_ACCOUNT,
-    VIEW_DASHBOARD,
-    require_permission,
 )
 from datetime import date
 
@@ -83,13 +80,10 @@ def apply_change(
 @router.get("", response_model=list[AccountOut])
 def list_accounts(
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(VIEW_DASHBOARD)),
     db: Session = Depends(get_db),
 ) -> list[AccountOut]:
-    """Dashboard: accounts in the session workspace (scoped users see only theirs)."""
+    """Dashboard: every account in the session workspace."""
     query = db.query(Account).filter(Account.workspace_id == actor.workspace_id)
-    if actor.user.account_ref:
-        query = query.filter(Account.slug == actor.user.account_ref)
     return [account_out(a) for a in query.all()]
 
 
@@ -97,7 +91,6 @@ def list_accounts(
 def account_detail(
     slug: str,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(VIEW_ACCOUNT)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -119,7 +112,6 @@ def assign_owner(
     slug: str,
     body: AssignOwnerRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(ASSIGN_OWNER)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -141,7 +133,6 @@ def set_target_date(
     slug: str,
     body: SetTargetDateRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(SET_TARGET_DATE)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -166,7 +157,6 @@ def set_next_action(
     slug: str,
     body: SetNextActionRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(SET_NEXT_ACTION)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -193,7 +183,6 @@ def record_progress(
     slug: str,
     body: NoteRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(RECORD_PROGRESS)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -215,7 +204,6 @@ def open_internal_blocker(
     slug: str,
     body: BlockerRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(OPEN_INTERNAL_BLOCKER)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -240,7 +228,6 @@ def open_internal_blocker(
 def close_internal_blocker(
     slug: str,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(CLOSE_INTERNAL_BLOCKER)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -262,7 +249,6 @@ def close_customer_blocker(
     slug: str,
     body: CustomerUpdateRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(CLOSE_CUSTOMER_BLOCKER)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:
@@ -288,7 +274,6 @@ def record_value_evidence(
     slug: str,
     body: EvidenceRequest,
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(RECORD_VALUE_EVIDENCE)),
     account: Account = Depends(get_scoped_account),
     db: Session = Depends(get_db),
 ) -> AccountOut:

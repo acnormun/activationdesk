@@ -73,8 +73,8 @@ class ActionTests(ApiTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["status"], "on_track")
 
-    def test_close_customer_blocker_records_finance_role(self) -> None:
-        self.login("finance", "finance123")
+    def test_close_customer_blocker_records_manager_role(self) -> None:
+        self.login("manager", "manager123")
         response = self.client.post(
             "/accounts/beta/customer-blocker/close",
             json={"customer_update": "Client confirmed the data feed."},
@@ -83,4 +83,4 @@ class ActionTests(ApiTestCase):
         self.assertEqual(response.json()["status"], "on_track")
         detail = self.client.get("/accounts/beta").json()
         pairs = [(h["action"], h["actor_role"]) for h in detail["history"]]
-        self.assertIn(("close_customer_blocker", "client_finance"), pairs)
+        self.assertIn(("close_customer_blocker", "onboarding_manager"), pairs)

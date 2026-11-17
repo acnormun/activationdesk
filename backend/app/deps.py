@@ -2,9 +2,8 @@
 
 Check order on every request:
 1. valid session -> else 401 (get_actor)
-2. role with permission -> else 403 (permissions.require_permission)
-3. account inside the user scope -> else 404 (get_scoped_account)
-4. business rules -> else 422 (business.validate_action, in the endpoints)
+2. account exists in the workspace -> else 404 (get_scoped_account)
+3. business rules -> else 422 (business.validate_action, in the endpoints)
 """
 
 from dataclasses import dataclass
@@ -54,9 +53,8 @@ def get_scoped_account(
     actor: Actor = Depends(get_actor),
     db: Session = Depends(get_db),
 ) -> Account:
-    """Check 3 - the account must exist inside the session workspace and,
-    for scoped roles (client finance), be the user's own account. Both cases
-    answer 404 so the account list is never leaked."""
+    """Check 2 - the account must exist inside the session workspace;
+    unknown slugs answer 404 so the account list is never leaked."""
     account = (
         db.query(Account)
         .filter(
@@ -65,7 +63,7 @@ def get_scoped_account(
         )
         .first()
     )
-    if account is None or (actor.user.account_ref and account.slug != actor.user.account_ref):
+    if account is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Account not found.",

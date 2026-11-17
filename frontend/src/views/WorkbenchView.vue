@@ -6,19 +6,17 @@ import {
   ApiError,
   fetchAccountDetail,
   fetchAccounts,
-  fetchPermissions,
   fetchWeekPlan,
 } from "@/api/client"
 import AccountCard from "@/components/AccountCard.vue"
 import WeekPlanPanel from "@/components/WeekPlanPanel.vue"
-import type { Account, AccountDetail, PermissionsMatrix, WeekPlan } from "@/types/workbench"
+import type { Account, AccountDetail, WeekPlan } from "@/types/workbench"
 import { STATUS_LABELS, emptyFilterMessage, filterAccounts } from "@/utils/workbench"
 
 const router = useRouter()
 
 const accounts = ref<Account[]>([])
 const plan = ref<WeekPlan | null>(null)
-const permissions = ref<PermissionsMatrix>({ actions: [] })
 const detail = ref<AccountDetail | null>(null)
 const selectedSlug = ref("")
 const statusFilter = ref("")
@@ -38,14 +36,9 @@ async function loadBoard(): Promise<void> {
   loading.value = true
   errorMessage.value = ""
   try {
-    const [accountRows, weekPlan, permissionRows] = await Promise.all([
-      fetchAccounts(),
-      fetchWeekPlan(),
-      fetchPermissions(),
-    ])
+    const [accountRows, weekPlan] = await Promise.all([fetchAccounts(), fetchWeekPlan()])
     accounts.value = accountRows
     plan.value = weekPlan
-    permissions.value = permissionRows
   } catch (error) {
     errorMessage.value =
       error instanceof ApiError ? error.detail : "Unable to load the workbench. Please try again."
@@ -85,7 +78,7 @@ onMounted(loadBoard)
       <h1>Activation Desk</h1>
       <div v-if="session.user" class="workbench-session">
         <span>{{ session.workspace?.name }}</span>
-        <span>{{ session.user.username }} ({{ session.user.role }})</span>
+        <span>{{ session.user.username }}</span>
         <button type="button" @click="onLogout">Sign out</button>
       </div>
     </header>
@@ -121,8 +114,6 @@ onMounted(loadBoard)
             <li v-for="account in filtered" :key="account.slug">
               <AccountCard
                 :account="account"
-                :permission-rows="permissions.actions"
-                :role="session.user?.role ?? ''"
                 :today="today"
                 :selected="account.slug === selectedSlug"
                 @changed="refresh"

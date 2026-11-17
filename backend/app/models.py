@@ -17,11 +17,9 @@ def utcnow() -> datetime:
 
 
 class Role:
-    """The three demo roles."""
+    """The single demo user role (the onboarding manager)."""
 
     ONBOARDING_MANAGER = "onboarding_manager"
-    CLIENT_FINANCE = "client_finance"
-    CS_HEAD = "cs_head"
 
 
 class DemoWorkspace(Base):
@@ -37,7 +35,7 @@ class DemoWorkspace(Base):
 
 
 class User(Base):
-    """Demo user. account_ref scopes client roles to a single account slug."""
+    """The single demo user: the onboarding manager sees every account."""
 
     __tablename__ = "users"
 

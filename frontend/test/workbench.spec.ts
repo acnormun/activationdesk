@@ -5,12 +5,11 @@ import {
   filterAccounts,
   flagLabel,
   laneClass,
-  roleCan,
   statusClass,
   statusLabel,
   targetLabel,
 } from "../src/utils/workbench"
-import type { Account, PermissionRow } from "../src/types/workbench"
+import type { Account } from "../src/types/workbench"
 
 function account(overrides: Partial<Account> = {}): Account {
   return {
@@ -36,21 +35,6 @@ function account(overrides: Partial<Account> = {}): Account {
     ...overrides,
   }
 }
-
-const rows: PermissionRow[] = [
-  {
-    action: "assign_owner",
-    onboarding_manager: true,
-    client_finance: false,
-    cs_head: false,
-  },
-  {
-    action: "close_customer_blocker",
-    onboarding_manager: false,
-    client_finance: true,
-    cs_head: false,
-  },
-]
 
 describe("lane metadata", () => {
   it("orders the six domain lanes", () => {
@@ -138,17 +122,5 @@ describe("emptyFilterMessage", () => {
     expect(emptyFilterMessage("activated", "nebula")).toBe(
       'No activated accounts match "nebula".',
     )
-  })
-})
-
-describe("roleCan", () => {
-  it("allows a permitted role", () => {
-    expect(roleCan(rows, "assign_owner", "onboarding_manager")).toBe(true)
-    expect(roleCan(rows, "close_customer_blocker", "client_finance")).toBe(true)
-  })
-
-  it("denies roles and unknown actions", () => {
-    expect(roleCan(rows, "assign_owner", "cs_head")).toBe(false)
-    expect(roleCan(rows, "nonexistent_action", "onboarding_manager")).toBe(false)
   })
 })

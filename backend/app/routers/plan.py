@@ -16,7 +16,7 @@ from ..domain.models import Lane
 from ..domain.priority import ScoreComponent, WeekPlanEntry, plan_week
 from ..facts import to_domain
 from ..models import Account
-from ..permissions import VIEW_DASHBOARD, require_permission
+from ..business import VIEW_DASHBOARD
 
 router = APIRouter(prefix="/plan", tags=["plan"])
 
@@ -54,15 +54,11 @@ def _entry_out(entry: WeekPlanEntry) -> dict:
 def week_plan(
     slots: int = Query(default=2, ge=1, le=8),
     actor: Actor = Depends(get_actor),
-    _: None = Depends(require_permission(VIEW_DASHBOARD)),
     db: Session = Depends(get_db),
 ) -> dict:
     """This week's lanes for the workspace, computed by the domain layer."""
     today = date.today()
     rows = db.query(Account).filter(Account.workspace_id == actor.workspace_id)
-    if actor.user.account_ref:
-        # Pipeline 0 scope rule: client finance only sees their own account.
-        rows = rows.filter(Account.slug == actor.user.account_ref)
     domain_accounts = tuple(to_domain(row) for row in rows.order_by(Account.slug))
     week = plan_week(domain_accounts, today, slots=slots)
 

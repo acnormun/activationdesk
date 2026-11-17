@@ -50,17 +50,6 @@ class WeekPlanTests(ApiTestCase):
         self.assertEqual(data["slots"], 1)
         self.assertEqual(data["empty_slots"], 0)
 
-    def test_client_finance_sees_only_their_account(self) -> None:
-        self.login("finance", "finance123")
-        response = self.client.get("/plan/week")
-        self.assertEqual(response.status_code, 200, response.text)
-        seen = [
-            entry["account_slug"]
-            for lane in response.json()["lanes"].values()
-            for entry in lane
-        ]
-        self.assertEqual(seen, ["beta"])
-
     def test_week_plan_requires_session(self) -> None:
         self.assertEqual(self.client.get("/plan/week").status_code, 401)
 

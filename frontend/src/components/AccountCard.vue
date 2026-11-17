@@ -11,13 +11,11 @@ import {
   setNextAction,
   setTargetDate,
 } from "@/api/client"
-import type { Account, PermissionRow } from "@/types/workbench"
-import { flagLabel, roleCan, statusClass, statusLabel, targetLabel } from "@/utils/workbench"
+import type { Account } from "@/types/workbench"
+import { flagLabel, statusClass, statusLabel, targetLabel } from "@/utils/workbench"
 
 const props = defineProps<{
   account: Account
-  permissionRows: PermissionRow[]
-  role: string
   today: string
   selected: boolean
 }>()
@@ -48,10 +46,6 @@ const evidenceForm = ref({
 
 /** Activated accounts accept no further changes (the backend rejects them too). */
 const canAct = computed(() => props.account.status !== "activated")
-
-function allowed(action: string): boolean {
-  return roleCan(props.permissionRows, action, props.role)
-}
 
 function toggleForm(name: string): void {
   errorMessage.value = ""
@@ -118,7 +112,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
     <div v-if="account.internal_blocker" class="blocker-box">
       <span>Internal blocker: {{ account.internal_blocker }}</span>
       <button
-        v-if="canAct && allowed('close_internal_blocker')"
+        v-if="canAct"
         type="button"
         :disabled="working"
         @click="run(() => closeInternalBlocker(account.slug))"
@@ -129,7 +123,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
     <div v-if="account.customer_blocker" class="blocker-box">
       <span>Customer blocker: {{ account.customer_blocker }}</span>
       <button
-        v-if="canAct && allowed('close_customer_blocker')"
+        v-if="canAct"
         type="button"
         :disabled="working"
         @click="toggleForm('customer-blocker')"
@@ -153,7 +147,6 @@ async function run(action: () => Promise<unknown>): Promise<void> {
       <h4>Actions</h4>
       <div class="action-row">
         <button
-          v-if="allowed('assign_owner')"
           type="button"
           class="action"
           @click="toggleForm('owner')"
@@ -161,7 +154,6 @@ async function run(action: () => Promise<unknown>): Promise<void> {
           Assign owner
         </button>
         <button
-          v-if="allowed('set_target_date')"
           type="button"
           class="action"
           @click="toggleForm('target-date')"
@@ -169,7 +161,6 @@ async function run(action: () => Promise<unknown>): Promise<void> {
           Set target date
         </button>
         <button
-          v-if="allowed('set_next_action')"
           type="button"
           class="action"
           @click="toggleForm('next-action')"
@@ -177,7 +168,6 @@ async function run(action: () => Promise<unknown>): Promise<void> {
           Set next action
         </button>
         <button
-          v-if="allowed('record_progress')"
           type="button"
           class="action"
           @click="toggleForm('progress')"
@@ -185,7 +175,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
           Record progress
         </button>
         <button
-          v-if="allowed('open_internal_blocker') && !account.internal_blocker"
+          v-if="!account.internal_blocker"
           type="button"
           class="action"
           @click="toggleForm('internal-blocker')"
@@ -193,7 +183,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
           Open internal blocker
         </button>
         <button
-          v-if="allowed('record_value_evidence') && !account.evidence_approved_by"
+          v-if="!account.evidence_approved_by"
           type="button"
           class="action"
           @click="toggleForm('value-evidence')"

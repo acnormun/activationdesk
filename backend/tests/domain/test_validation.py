@@ -116,9 +116,9 @@ class BlockerResolutionValidationTests(unittest.TestCase):
         self.assertIs(self.internal.side, BlockerSide.INTERNAL)
         self.assertIs(self.customer.side, BlockerSide.CUSTOMER)
 
-    def test_customer_blocker_needs_customer_update_and_finance_lead(self):
+    def test_customer_blocker_needs_simulated_customer_update(self):
         errors = validate_blocker_resolution(
-            self.customer, ResolvedVia.INTERNAL_FIX, Role.CUSTOMER_FINANCE_LEAD
+            self.customer, ResolvedVia.INTERNAL_FIX, Role.ONBOARDING_MANAGER
         )
         self.assertEqual(len(errors), 1)
         self.assertIn(
@@ -126,23 +126,15 @@ class BlockerResolutionValidationTests(unittest.TestCase):
             errors[0],
         )
 
+    def test_customer_blocker_happy_path(self):
         errors = validate_blocker_resolution(
             self.customer,
             ResolvedVia.CUSTOMER_UPDATE_SIMULATED,
             Role.ONBOARDING_MANAGER,
         )
-        self.assertEqual(len(errors), 1)
-        self.assertIn("customer finance lead", errors[0])
-
-    def test_customer_blocker_happy_path(self):
-        errors = validate_blocker_resolution(
-            self.customer,
-            ResolvedVia.CUSTOMER_UPDATE_SIMULATED,
-            Role.CUSTOMER_FINANCE_LEAD,
-        )
         self.assertEqual(errors, [])
 
-    def test_internal_blocker_needs_internal_fix_and_manager(self):
+    def test_internal_blocker_needs_internal_fix(self):
         errors = validate_blocker_resolution(
             self.internal,
             ResolvedVia.CUSTOMER_UPDATE_SIMULATED,
@@ -150,12 +142,6 @@ class BlockerResolutionValidationTests(unittest.TestCase):
         )
         self.assertEqual(len(errors), 1)
         self.assertIn("internal fix", errors[0])
-
-        errors = validate_blocker_resolution(
-            self.internal, ResolvedVia.INTERNAL_FIX, Role.CUSTOMER_FINANCE_LEAD
-        )
-        self.assertEqual(len(errors), 1)
-        self.assertIn("Only the onboarding manager", errors[0])
 
     def test_internal_blocker_happy_path(self):
         errors = validate_blocker_resolution(

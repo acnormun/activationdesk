@@ -1,4 +1,4 @@
-/** Shapes returned by the /accounts, /plan/week and /permissions endpoints. */
+/** Shapes returned by the /accounts and /plan/week endpoints. */
 
 export interface Account {
   id: number
@@ -59,16 +59,4 @@ export interface WeekPlan {
   empty_slots: number
   message: string
   lanes: Record<string, PlanEntry[]>
-}
-
-export interface PermissionRow {
-  action: string
-  onboarding_manager: boolean
-  client_finance: boolean
-  cs_head: boolean
-}
-
-/** Shape returned by GET /permissions. */
-export interface PermissionsMatrix {
-  actions: PermissionRow[]
 }
